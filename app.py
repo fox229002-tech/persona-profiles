@@ -1,6 +1,7 @@
 import json
 import random
 import re
+import time
 
 import requests
 import streamlit as st
@@ -15,26 +16,40 @@ def ask_llm(prompt: str) -> str:
     provider = st.secrets.get("PROVIDER", "deepseek")
 
     if provider == "gemini":
-        model = st.secrets.get("GEMINI_MODEL", "gemini-3.8-flash")
-        r = requests.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-            headers={
-                "x-goog-api-key": st.secrets["GEMINI_API_KEY"],
-                "Content-Type": "application/json",
-            },
-            json={
-                "system_instruction": {"parts": [{"text": SYSTEM}]},
-                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": 0.7},
-            },
-            timeout=120,
-        )
-        r.raise_for_status()
-        data = r.json()
-        if not data.get("candidates"):
-            raise RuntimeError(f"Пустой ответ модели: {data.get('promptFeedback')}")
-        parts = data["candidates"][0].get("content", {}).get("parts", [])
-        return "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
+        primary = st.secrets.get("GEMINI_MODEL", "gemini-3.8-flash")
+        models = [primary] + [
+            m for m in ("gemini-3.6-flash", "gemini-3.1-flash-lite") if m != primary
+        ]
+        last_err = None
+        for model in models:
+            for attempt in range(2):
+                try:
+                    r = requests.post(
+                        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                        headers={
+                            "x-goog-api-key": st.secrets["GEMINI_API_KEY"],
+                            "Content-Type": "application/json",
+                        },
+                        json={
+                            "system_instruction": {"parts": [{"text": SYSTEM}]},
+                            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                            "generationConfig": {"temperature": 0.7},
+                        },
+                        timeout=120,
+                    )
+                    if r.status_code in (429, 500, 503, 504):
+                        last_err = f"{r.status_code} ({model})"
+                        time.sleep(2 * (attempt + 1))
+                        continue
+                    r.raise_for_status()
+                    data = r.json()
+                    if not data.get("candidates"):
+                        raise RuntimeError(f"Пустой ответ модели: {data.get('promptFeedback')}")
+                    parts = data["candidates"][0].get("content", {}).get("parts", [])
+                    return "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
+                except requests.exceptions.Timeout:
+                    last_err = f"таймаут ({model})"
+        raise RuntimeError(f"Gemini сейчас перегружен, попробуйте через минуту. Последняя ошибка: {last_err}")
 
     if provider == "claude":
         r = requests.post(
