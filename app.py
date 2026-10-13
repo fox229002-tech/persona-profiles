@@ -450,8 +450,10 @@ with tab_compat:
         if st.button("Проверить совместимость", disabled=not ready):
             with st.spinner("Анализирую сочетание..."):
                 try:
-                    st.session_state.compat = analyze_compatibility(
-                        texts[0], texts[1], names[0] or "Человек А", names[1] or "Человек Б", relation
+                    na, nb = names[0] or "Человек А", names[1] or "Человек Б"
+                    st.session_state.compat = analyze_compatibility(texts[0], texts[1], na, nb, relation)
+                    st.session_state.compat_text = (
+                        f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{st.session_state.compat}"
                     )
                 except Exception as e:
                     st.error(f"Не получилось: {e}")
@@ -459,3 +461,8 @@ with tab_compat:
         if st.session_state.get("compat"):
             st.subheader("💞 Разбор совместимости")
             st.markdown(st.session_state.compat)
+            st.download_button(
+                "⬇️ Скачать разбор совместимости (.txt)",
+                st.session_state.get("compat_text", st.session_state.compat),
+                file_name="compatibility.txt",
+            )
