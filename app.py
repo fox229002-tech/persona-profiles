@@ -227,6 +227,19 @@ def read_profile_file(f) -> str:
 RELATION_TYPES = ["Романтические отношения", "Дружба", "Работа и партнёрство", "Семья"]
 
 
+COMPAT_SAMPLE = """Образец формата (содержание, названия типов и формулировки не копируй):
+
+| Параметр | Человек А | Человек Б | Сочетание |
+|---|---|---|---|
+| Ценности | Эстетика, свобода через контроль | Честь, структура, предсказуемость | ✔ Высокое: оба уважают внутренний кодекс |
+| Темп | Скачками, реактивный | Стабильный, холодноватый | ⚠ Разный ритм |
+
+Проблема 1. Борьба за контроль
+- **Сценарий:** оба хотят держать стратегию и склонны проверять другого.
+- **Реакция:** молчание одного читается как манипуляция, импульсивные ходы другого как угроза стабильности.
+- **Решение:** разделить зоны ответственности («ты отвечаешь за X, я за Y») и записать общие правила пары."""
+
+
 def analyze_compatibility(a: str, b: str, name_a: str, name_b: str, relation: str) -> str:
     prompt = (
         f"Ниже два психопрофиля: «{name_a}» и «{name_b}». Тип отношений: {relation}.\n\n"
@@ -236,19 +249,53 @@ def analyze_compatibility(a: str, b: str, name_a: str, name_b: str, relation: st
         "Пиши на «вы», обращаясь к паре, и называй людей по именам из заголовков. "
         + STYLE_RULES + " "
         "Оба человека равноценны: никого не обвиняй, не ставь диагнозов, не называй никого "
-        "«токсичным» и не выноси вердикт «подходят / не подходят», не предсказывай будущее отношений. "
-        "Пиши «склонен», «может», а не «всегда». Опирайся только на содержимое профилей. "
+        "«токсичным», не выноси вердикт «подходят / не подходят» и не называй сроков. "
+        "Пиши «склонен», «может», а не «всегда». Опирайся только на содержимое профилей, "
+        "зоны мозга и измерения не упоминай. "
         "Используй ровно эти заголовки с иконками:\n"
-        "💞 Общая картина сочетания (абзац)\n"
-        "✅ Сильные стороны пары (список из 4 пунктов)\n"
-        "⚡ Где возникают трения (список из 4 типичных ситуаций, коротко и конкретно)\n"
-        "🔍 Что стоит за этим у каждого (по абзацу на каждого человека)\n"
-        "🛠️ Как с этим справляться (список из 5 конкретных шагов: договорённости, фразы, привычки)\n"
-        "📚 Книги для пары (3–5 книг: автор — название, с короткой пометкой)\n"
-        "В конце одной тёплой строкой добавь: если трения повторяются и тяжелы, "
-        "стоит обратиться к семейному психологу, это нормальный шаг."
+        "🔍 Кто они (по строке на каждого: придумай короткое образное название типа и "
+        "добавь 1–2 предложения)\n"
+        "💠 Точки соприкосновения (markdown-таблица: Параметр | имя первого | имя второго | Сочетание; "
+        "4 строки: Ценности, Темп, Роль в паре, Эмоции; в последней колонке ✔ или ⚠ и несколько слов)\n"
+        "😶‍🌫️ Как каждый ведёт себя в стрессе и что получается в паре (абзац)\n"
+        "❤️‍🔥 Потенциал отношений (3 пункта: почему это может работать)\n"
+        "⚠️ Возможные проблемы (3 проблемы; у каждой строки «Сценарий», «Реакция», «Решение»; "
+        "решения конкретные: договорённости, фразы, ритуалы)\n"
+        "✅ Идеальный формат союза (3–4 пункта)\n"
+        "🔮 Если смотреть вперёд (два условных сценария: «если ничего не менять» и «если договориться»; "
+        "без сроков и без вердикта)\n"
+        "📚 Книги для пары (3 книги: автор — название, с короткой пометкой)\n"
+        "В конце одной тёплой строкой скажи: если трения повторяются и тяжелы, "
+        "стоит обратиться к семейному психологу, это нормальный шаг.\n\n"
+        + COMPAT_SAMPLE
     )
     return ask_llm(prompt)
+
+
+# ---------- тарифы и оплата ----------
+PRICE_PROFILE = int(st.secrets.get("PRICE_PROFILE", 199))
+PRICE_FULL = int(st.secrets.get("PRICE_FULL", 349))
+CURRENCY = "₽"
+
+PLANS = {
+    "profile": {
+        "label": f"Только профиль — {PRICE_PROFILE} {CURRENCY}",
+        "price": PRICE_PROFILE,
+        "desc": "Полный разбор выбранных образов: образ жизни, привычки, перегрузки, советы и книги.",
+    },
+    "full": {
+        "label": f"Профиль + совместимость — {PRICE_FULL} {CURRENCY}",
+        "price": PRICE_FULL,
+        "desc": "Всё из первого варианта и разбор совместимости двух профилей: "
+        "сильные стороны пары, трения и шаги по их преодолению.",
+    },
+}
+
+
+def process_payment(plan_key: str, amount: int) -> bool:
+    """ЗАГЛУШКА. Здесь подключается реальная оплата (ЮKassa, Stripe и т.п.):
+    создать платёж на сумму amount, дождаться подтверждения и вернуть True/False."""
+    return True
 
 
 # ---------- интерфейс ----------
@@ -301,13 +348,48 @@ with tab_profile:
                 st.checkbox("✅ Это про меня", key=f"pick_{i}")
 
         chosen = [p for i, p in enumerate(profiles) if st.session_state.get(f"pick_{i}")]
-        if st.button("Получить рекомендации", disabled=not chosen):
-            with st.spinner("Анализирую..."):
-                try:
-                    st.session_state.result = analyze(chosen)
-                    st.session_state.profile_text = build_profile_text(chosen, st.session_state.result)
-                except Exception as e:
-                    st.error(f"Не получилось: {e}")
+        paid_plan = st.session_state.get("paid_plan")
+
+        def run_analysis():
+            st.session_state.result = analyze(chosen)
+            st.session_state.profile_text = build_profile_text(chosen, st.session_state.result)
+
+        if paid_plan is None:
+            st.markdown("### Выберите вариант")
+            keys = list(PLANS)
+            choice = st.radio(
+                "Что вы хотите получить?",
+                keys,
+                format_func=lambda k: PLANS[k]["label"],
+                captions=[PLANS[k]["desc"] for k in keys],
+                key="plan_choice",
+            )
+            if not chosen:
+                st.caption("Сначала отметьте подходящие описания выше.")
+            if st.button(f"💳 Оплатить {PLANS[choice]['price']} {CURRENCY} и получить разбор",
+                         disabled=not chosen):
+                if process_payment(choice, PLANS[choice]["price"]):
+                    st.session_state.paid_plan = choice  # оплата не списывается повторно при ошибке
+                    ok = False
+                    with st.spinner("Анализирую..."):
+                        try:
+                            run_analysis()
+                            ok = True
+                        except Exception as e:
+                            st.error(f"Не получилось: {e}")
+                    if ok:
+                        st.rerun()
+                else:
+                    st.error("Оплата не прошла. Попробуйте ещё раз.")
+            st.caption("🧪 Демо-режим: оплата имитируется, деньги не списываются.")
+        else:
+            st.success(f"Ваш вариант: {PLANS[paid_plan]['label']} (оплачено, демо)")
+            if st.button("Получить рекомендации", disabled=not chosen):
+                with st.spinner("Анализирую..."):
+                    try:
+                        run_analysis()
+                    except Exception as e:
+                        st.error(f"Не получилось: {e}")
 
     if st.session_state.get("result"):
         st.subheader("🧠 Рекомендации")
@@ -321,41 +403,59 @@ with tab_profile:
 
 # ---- вкладка 2: совместимость ----
 with tab_compat:
-    st.info(
-        "Загрузите два готовых профиля (файл .txt или .docx, скачанный во вкладке «Мой профиль») "
-        "или вставьте текст, чтобы увидеть сочетание, возможные трения и способы с ними справляться."
-    )
-    relation = st.selectbox("Тип отношений", RELATION_TYPES)
+    plan_now = st.session_state.get("paid_plan")
+    if plan_now != "full":
+        st.warning("🔒 Разбор совместимости входит в вариант «Профиль + совместимость».")
+        if plan_now == "profile":
+            extra = PRICE_FULL - PRICE_PROFILE
+            label = f"💳 Добавить совместимость за {extra} {CURRENCY}"
+            amount = extra
+        else:
+            label = f"💳 Открыть «Профиль + совместимость» за {PRICE_FULL} {CURRENCY}"
+            amount = PRICE_FULL
+        if st.button(label):
+            if process_payment("full", amount):
+                st.session_state.paid_plan = "full"
+                st.rerun()
+            else:
+                st.error("Оплата не прошла. Попробуйте ещё раз.")
+        st.caption("🧪 Демо-режим: оплата имитируется, деньги не списываются.")
+    else:
+        st.info(
+            "Загрузите два готовых профиля (файл .txt или .docx, скачанный во вкладке «Мой профиль») "
+            "или вставьте текст, чтобы увидеть сочетание, возможные трения и способы с ними справляться."
+        )
+        relation = st.selectbox("Тип отношений", RELATION_TYPES)
 
-    texts, names = [], []
-    for key, default in (("a", "Человек А"), ("b", "Человек Б")):
-        st.markdown(f"#### {default}")
-        names.append(st.text_input("Имя или подпись", value=default, key=f"name_{key}"))
-        text = ""
-        if key == "a" and st.session_state.get("profile_text"):
-            if st.checkbox("Взять мой профиль из вкладки «Мой профиль»", key="use_mine"):
-                text = st.session_state.profile_text
-        if not text:
-            up = st.file_uploader("Файл профиля", type=["txt", "docx"], key=f"file_{key}")
-            if up is not None:
+        texts, names = [], []
+        for key, default in (("a", "Человек А"), ("b", "Человек Б")):
+            st.markdown(f"#### {default}")
+            names.append(st.text_input("Имя или подпись", value=default, key=f"name_{key}"))
+            text = ""
+            if key == "a" and st.session_state.get("profile_text"):
+                if st.checkbox("Взять мой профиль из вкладки «Мой профиль»", key="use_mine"):
+                    text = st.session_state.profile_text
+            if not text:
+                up = st.file_uploader("Файл профиля", type=["txt", "docx"], key=f"file_{key}")
+                if up is not None:
+                    try:
+                        text = read_profile_file(up)
+                    except Exception as e:
+                        st.error(f"Не удалось прочитать файл: {e}")
+            if not text:
+                text = st.text_area("Или вставьте текст профиля", key=f"text_{key}", height=150)
+            texts.append(text.strip())
+
+        ready = all(len(t) > 50 for t in texts)
+        if st.button("Проверить совместимость", disabled=not ready):
+            with st.spinner("Анализирую сочетание..."):
                 try:
-                    text = read_profile_file(up)
+                    st.session_state.compat = analyze_compatibility(
+                        texts[0], texts[1], names[0] or "Человек А", names[1] or "Человек Б", relation
+                    )
                 except Exception as e:
-                    st.error(f"Не удалось прочитать файл: {e}")
-        if not text:
-            text = st.text_area("Или вставьте текст профиля", key=f"text_{key}", height=150)
-        texts.append(text.strip())
+                    st.error(f"Не получилось: {e}")
 
-    ready = all(len(t) > 50 for t in texts)
-    if st.button("Проверить совместимость", disabled=not ready):
-        with st.spinner("Анализирую сочетание..."):
-            try:
-                st.session_state.compat = analyze_compatibility(
-                    texts[0], texts[1], names[0] or "Человек А", names[1] or "Человек Б", relation
-                )
-            except Exception as e:
-                st.error(f"Не получилось: {e}")
-
-    if st.session_state.get("compat"):
-        st.subheader("💞 Разбор совместимости")
-        st.markdown(st.session_state.compat)
+        if st.session_state.get("compat"):
+            st.subheader("💞 Разбор совместимости")
+            st.markdown(st.session_state.compat)
