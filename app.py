@@ -14,6 +14,28 @@ SYSTEM = "Ты умный и эмпатичный ИИ, помогай поль�
 def ask_llm(prompt: str) -> str:
     provider = st.secrets.get("PROVIDER", "deepseek")
 
+    if provider == "gemini":
+        model = st.secrets.get("GEMINI_MODEL", "gemini-3.8-flash")
+        r = requests.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+            headers={
+                "x-goog-api-key": st.secrets["GEMINI_API_KEY"],
+                "Content-Type": "application/json",
+            },
+            json={
+                "system_instruction": {"parts": [{"text": SYSTEM}]},
+                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                "generationConfig": {"temperature": 0.7},
+            },
+            timeout=120,
+        )
+        r.raise_for_status()
+        data = r.json()
+        if not data.get("candidates"):
+            raise RuntimeError(f"Пустой ответ модели: {data.get('promptFeedback')}")
+        parts = data["candidates"][0].get("content", {}).get("parts", [])
+        return "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
+
     if provider == "claude":
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
@@ -63,6 +85,8 @@ STYLE_SAMPLE = """Образец структуры и тона (содержа�
 def generate_profiles(characters: str) -> list[dict]:
     prompt = (
         f"Пользователь назвал персонажей фильмов, книг или реальных публичных людей: {characters}.\n"
+        "Если после имени в скобках есть пояснение, это лишь справка о том, кто это; "
+        "психотип определяй сам, не опираясь на характеристики, которые дал пользователь. "
         "Для КАЖДОГО создай отдельную обезличенную психофизиологическую карточку. "
         "Образы формируются не как историческая справка, а как метафорические психотипы. "
         "Не называй имён, не упоминай персонажей и не намекай на них, не нумеруй. "
@@ -112,9 +136,11 @@ st.caption(
     "Это не диагностика и не медицинская информация."
 )
 st.info(
-    "Введите 1–3 персонажей или публичных людей, с которыми вы себя ассоциируете. "
-    "Если персонаж редкий, добавьте описание в скобках. "
-    "Пример: Анна (интроверт, тревожная), Гоша (добрый, тихий лидер)"
+    "Введите 1–3 персонажей фильмов, книг или публичных людей, с которыми вы себя ассоциируете. "
+    "Если персонаж малоизвестен, укажите в скобках, кто это (откуда он, кем является), "
+    "без описания характера. "
+    "Пример: Гоша (герой фильма «Москва слезам не верит»), "
+    "Харли Квинн, Дональд Трамп"
 )
 
 characters = st.text_input("Персонажи")
