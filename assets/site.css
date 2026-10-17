@@ -76,3 +76,15 @@ html{scroll-behavior:smooth}#how,#example,#prices,#faq{scroll-margin-top:25px}
 .site-navigation a.site-navigation-cta{background:#6E5C8E;color:#fff;padding:10px 22px}
 .site-navigation a.site-navigation-cta:hover{background:#584974;color:#fff}
 @media(max-width:700px){.site-navigation{justify-content:center}.site-navigation-brand{width:100%;text-align:center;margin:0}}
+
+/* Approved artwork is the only header; hotspot links are transparent. */
+.exact-header{width:100%!important;max-width:none!important;margin:0!important;line-height:0!important}
+.exact-header img{display:block!important;width:100%!important;max-width:none!important;height:auto!important}
+.exact-header .header-hotspots{position:absolute!important;inset:0!important}
+.block-container{max-width:1260px!important;padding-top:.7rem!important}
+.exact-header .nav-how{left:26%;top:1%;width:13%;height:11%}
+.exact-header .nav-example{left:40%;top:1%;width:9%;height:11%}
+.exact-header .nav-prices{left:49%;top:1%;width:9%;height:11%}
+.exact-header .nav-faq{left:58%;top:1%;width:9%;height:11%}
+.exact-header .nav-try{left:78%;top:1%;width:16%;height:13%}
+.exact-header .hero-try{left:7%;top:68%;width:22%;height:13%}
