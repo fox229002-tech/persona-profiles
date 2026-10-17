@@ -57,3 +57,13 @@ div.stButton:has(button[key="start_hero"]){margin-top:-76px;position:relative;z-
 .landing-prices article small{color:#706c76}
 .landing-footer{margin-top:75px;padding:30px 0;border-top:1px solid #d9d5d9;display:flex;justify-content:space-between;gap:20px;font-size:.85rem;color:#77727c}
 @media(max-width:800px){.landing-hero{grid-template-columns:1fr}.landing-copy{padding:38px 28px 24px}.landing-landscape{min-height:270px}.landing-steps{grid-template-columns:1fr}.landing-teaser{grid-template-columns:1fr;padding:20px}.landing-prices{grid-template-columns:1fr}.landing-footer{flex-direction:column}.landing-copy h1{font-size:2.6rem!important}}
+
+html{scroll-behavior:smooth}#how,#example,#prices,#faq{scroll-margin-top:25px}
+.exact-header{position:relative;width:100%;margin:8px auto 0;line-height:0}
+.exact-header img{width:100%;height:auto;display:block}
+.header-hotspots{position:absolute;inset:0;pointer-events:none}
+.header-hotspots .hotspot{position:absolute;display:block;pointer-events:auto;cursor:pointer;border-radius:24px}
+.header-hotspots .hotspot:focus-visible{outline:3px solid #6E5C8E}
+.nav-how{left:26%;top:3%;width:13%;height:10%}.nav-example{left:40%;top:3%;width:9%;height:10%}
+.nav-prices{left:49%;top:3%;width:9%;height:10%}.nav-faq{left:58%;top:3%;width:9%;height:10%}
+.nav-try{left:78%;top:2%;width:16%;height:12%}.hero-try{left:7%;top:68%;width:22%;height:12%}
