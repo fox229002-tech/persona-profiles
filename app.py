@@ -1,4 +1,5 @@
 import json
+import base64
 import random
 import re
 import time
@@ -314,41 +315,47 @@ def show_art(filename, width=None):
         else:
             st.image(str(path), width=width)
 
+if st.query_params.get("view") == "research":
+    st.session_state.site_page = "Исследование"
+    st.query_params.clear()
+
 st.markdown("**ОБРАЗЫ**  ·  пространство для исследования себя")
 page = st.radio("Раздел сайта", ["Главная", "Исследование"], horizontal=True, label_visibility="collapsed", key="site_page")
 
 if page == "Главная":
     # Композиция лендинга — HTML/CSS; исследование остаётся на Streamlit.
-    st.markdown("""
-    <section class="landing-hero">
-      <div class="landing-copy">
-        <div class="landing-kicker"><span class="landing-dot"></span> ПУТЕШЕСТВИЕ К СЕБЕ</div>
-        <h1>Узнайте себя<br>через образы,<br><em>которые вам близки</em></h1>
-        <p>Любимые герои иногда рассказывают о нас больше, чем привычные вопросы. Выберите знакомые образы — и посмотрите на себя с новой стороны.</p>
-        <div class="landing-mini">01 · Образы &nbsp;&nbsp; 02 · Выбор &nbsp;&nbsp; 03 · Ваш профиль</div>
-      </div>
-      <div class="landing-landscape" aria-label="Мягкие холмы и извилистая дорога">
-        <div class="landing-sun"></div>
-        <div class="landing-hill hill-back"></div>
-        <div class="landing-hill hill-middle"></div>
-        <div class="landing-hill hill-front"></div>
-        <svg class="landing-road" viewBox="0 0 500 560" preserveAspectRatio="none" aria-hidden="true"><path d="M220 570 C310 455 400 420 280 330 C160 250 330 200 410 80" fill="none" stroke="#F6F4EF" stroke-width="66" stroke-linecap="round"/><path d="M220 570 C310 455 400 420 280 330 C160 250 330 200 410 80" fill="none" stroke="#E3D6C5" stroke-width="2" stroke-dasharray="10 18"/></svg>
-      </div>
-    </section>
-    """, unsafe_allow_html=True)
+    header_path = ASSETS / "header.png"
+    if header_path.exists():
+        header_data = base64.b64encode(header_path.read_bytes()).decode("ascii")
+        st.markdown(f"""
+        <div class="exact-header">
+          <img src="data:image/png;base64,{header_data}" alt="Образы — исследование себя">
+          <nav class="header-hotspots" aria-label="Навигация">
+            <a class="hotspot nav-how" href="#how" aria-label="Как это работает"></a>
+            <a class="hotspot nav-example" href="#example" aria-label="Пример"></a>
+            <a class="hotspot nav-prices" href="#prices" aria-label="Тарифы"></a>
+            <a class="hotspot nav-faq" href="#faq" aria-label="Вопросы"></a>
+            <a class="hotspot nav-try" href="?view=research" aria-label="Попробовать"></a>
+            <a class="hotspot hero-try" href="?view=research" aria-label="Начать исследование"></a>
+          </nav>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.info("Добавьте исходное изображение в GitHub: assets/header.png — тогда здесь появится утверждённая шапка.")
+        st.markdown('<div class="hero"><h1>Узнайте себя через образы, которые вам близки</h1></div>', unsafe_allow_html=True)
     if st.button("Начать исследование  →", type="primary", key="start_hero"):
         st.session_state.site_page = "Исследование"
         st.rerun()
-    st.markdown('<div class="landing-section-head"><span>ПРОСТО И ИНТЕРЕСНО</span><h2>Как это работает</h2><p>Три шага, чтобы увидеть себя с неожиданной стороны.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div id="how" class="landing-section-head"><span>ПРОСТО И ИНТЕРЕСНО</span><h2>Как это работает</h2><p>Три шага, чтобы увидеть себя с неожиданной стороны.</p></div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="landing-steps">
       <article><span>01</span><h3>Назовите героев</h3><p>Введите от одного до трёх персонажей, с которыми вы себя ассоциируете.</p></article>
       <article><span>02</span><h3>Узнайте себя</h3><p>Прочитайте анонимные карточки и отметьте те, что вам близки.</p></article>
       <article><span>03</span><h3>Получите профиль</h3><p>ИИ подготовит разбор выбранных образов и рекомендации.</p></article>
     </div>
-    <div class="landing-section-head"><span>РЕЗУЛЬТАТ</span><h2>Что вы узнаете</h2></div>
+    <div id="example" class="landing-section-head"><span>РЕЗУЛЬТАТ</span><h2>Что вы узнаете</h2></div>
     <div class="landing-teaser"><div class="landing-teaser-art"><span>✦</span></div><div><h3>Ваш индивидуальный разбор</h3><p>Особенности образа жизни, привычные реакции, возможные перегрузки, способы адаптации и книги для размышления.</p><p class="landing-disclaimer">Это метафорическое исследование, а не психологическая или медицинская диагностика.</p></div></div>
-    <div class="landing-section-head"><span>ВАРИАНТЫ ИССЛЕДОВАНИЯ</span><h2>Выберите свой путь</h2></div>
+    <div id="prices" class="landing-section-head"><span>ВАРИАНТЫ ИССЛЕДОВАНИЯ</span><h2>Выберите свой путь</h2></div>
     """, unsafe_allow_html=True)
     st.markdown(f"""
     <div class="landing-prices">
@@ -359,7 +366,7 @@ if page == "Главная":
     if st.button("Попробовать бесплатно в деморежиме  →", key="start_bottom"):
         st.session_state.site_page = "Исследование"
         st.rerun()
-    st.markdown('<div class="landing-section-head"><span>ВОПРОСЫ И ОТВЕТЫ</span><h2>Перед началом</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div id="faq" class="landing-section-head"><span>ВОПРОСЫ И ОТВЕТЫ</span><h2>Перед началом</h2></div>', unsafe_allow_html=True)
     with st.expander("Это психологический тест или терапия?"):
         st.write("Нет. Это информационно-развлекательный формат саморефлексии, а не диагностика или медицинская консультация.")
     with st.expander("Будут ли известны персонажи по карточкам?"):
