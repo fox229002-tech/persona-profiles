@@ -20,3 +20,40 @@ input,textarea { border-radius:12px !important; }
 .plan-card { background:#fff; border-radius:24px; padding:1.6rem; border:1px solid #e6e1e9; }
 .plan-card.featured { background:#e9e2f3; border-color:var(--lavender); }
 .small-print { font-size:.8rem; opacity:.75; }
+
+/* Landing v2: large integrated editorial composition */
+.landing-hero{display:grid;grid-template-columns:1.03fr .97fr;min-height:540px;overflow:hidden;border-radius:28px;background:#D6E7DE;position:relative;margin:18px 0 16px}
+.landing-copy{padding:64px 20px 45px 62px;position:relative;z-index:2}
+.landing-kicker,.landing-section-head>span,.landing-prices article>span{font-size:.75rem;font-weight:750;letter-spacing:.17em;color:#6E5C8E}
+.landing-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#6E5C8E;margin-right:9px}
+.landing-copy h1{font-family:Georgia,'Times New Roman',serif!important;font-weight:500!important;letter-spacing:-.045em!important;font-size:clamp(2.6rem,4.5vw,4.3rem)!important;line-height:1.08!important;margin:38px 0 24px;color:#2B2A33}
+.landing-copy h1 em{font-style:italic;color:#6E5C8E}
+.landing-copy p{font-size:1.06rem;max-width:420px;line-height:1.75;color:#3f4550}
+.landing-mini{font-size:.75rem;letter-spacing:.04em;color:#6E5C8E;margin-top:30px}
+.landing-landscape{position:relative;overflow:hidden;min-height:540px}
+.landing-sun{position:absolute;width:170px;height:170px;top:55px;right:110px;background:#F7E7BE;border-radius:50%}
+.landing-hill{position:absolute;width:160%;height:90%;left:-15%;border-radius:50% 50% 0 0}
+.hill-back{top:33%;background:#B9A9D6;transform:rotate(-13deg)}
+.hill-middle{top:51%;background:#8FA89A;transform:rotate(10deg);left:-36%}
+.hill-front{top:70%;background:#6E5C8E;transform:rotate(-12deg);opacity:.86}
+.landing-road{position:absolute;width:80%;height:100%;left:2%;top:4%;filter:drop-shadow(0 4px 2px #5b67721a)}
+div.stButton:has(button[key="start_hero"]){margin-top:-76px;position:relative;z-index:5}
+.landing-section-head{text-align:center;margin:75px auto 28px;max-width:640px}
+.landing-section-head h2{font-family:Georgia,serif!important;font-weight:500!important;font-size:clamp(2rem,3.2vw,3rem)!important;margin:10px 0}
+.landing-section-head p{color:#6b6871}
+.landing-steps,.landing-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.landing-steps article{background:#fff;border-radius:20px;padding:32px 27px;min-height:220px}
+.landing-steps article span{font-family:Georgia,serif;font-size:2.5rem;color:#B9A9D6}
+.landing-steps h3,.landing-prices h3,.landing-teaser h3{font-family:Georgia,serif;font-size:1.6rem!important;font-weight:500;margin:14px 0}
+.landing-steps p,.landing-prices p{color:#55535b;font-size:.95rem}
+.landing-teaser{display:grid;grid-template-columns:35% 65%;gap:30px;align-items:center;background:#e7e0f0;border-radius:24px;padding:30px 60px 30px 30px}
+.landing-teaser-art{min-height:250px;border-radius:18px;background:radial-gradient(circle at 50% 30%,#F6F4EF 0 55px,transparent 57px),linear-gradient(155deg,#8FA89A 50%,#6E5C8E 50%);display:grid;place-items:center}
+.landing-teaser-art span{font-size:4rem;color:#6E5C8E}
+.landing-disclaimer{font-size:.85rem;color:#706c76}
+.landing-prices{grid-template-columns:1fr 1fr;gap:22px}
+.landing-prices article{background:#fff;border:1px solid #e5e0e8;border-radius:24px;padding:36px;min-height:280px;display:flex;flex-direction:column}
+.landing-prices article.featured{background:#e7e0f0;border-color:#B9A9D6}
+.landing-prices article strong{font-size:2rem;margin-top:auto;color:#2B2A33}
+.landing-prices article small{color:#706c76}
+.landing-footer{margin-top:75px;padding:30px 0;border-top:1px solid #d9d5d9;display:flex;justify-content:space-between;gap:20px;font-size:.85rem;color:#77727c}
+@media(max-width:800px){.landing-hero{grid-template-columns:1fr}.landing-copy{padding:38px 28px 24px}.landing-landscape{min-height:270px}.landing-steps{grid-template-columns:1fr}.landing-teaser{grid-template-columns:1fr;padding:20px}.landing-prices{grid-template-columns:1fr}.landing-footer{flex-direction:column}.landing-copy h1{font-size:2.6rem!important}}
