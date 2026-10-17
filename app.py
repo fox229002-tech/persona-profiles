@@ -327,6 +327,16 @@ if page == "Главная":
     header_path = ASSETS / "header.png"
     if header_path.exists():
         header_data = base64.b64encode(header_path.read_bytes()).decode("ascii")
+        st.markdown("""
+        <nav class="site-navigation" aria-label="Разделы главной страницы">
+          <span class="site-navigation-brand">Образы</span>
+          <a href="#how">Как это работает</a>
+          <a href="#example">Пример</a>
+          <a href="#prices">Тарифы</a>
+          <a href="#faq">Вопросы</a>
+          <a class="site-navigation-cta" href="?view=research">Попробовать →</a>
+        </nav>
+        """, unsafe_allow_html=True)
         st.markdown(f"""
         <div class="exact-header">
           <img src="data:image/png;base64,{header_data}" alt="Образы — исследование себя">
