@@ -1,5 +1,6 @@
 import json
 import base64
+import hmac
 import random
 import re
 import time
@@ -379,8 +380,19 @@ if page == "Главная":
     st.stop()
 
 pwd = st.secrets.get("APP_PASSWORD")
-if pwd and st.text_input("Пароль", type="password") != pwd:
-    st.stop()
+if pwd:
+    if not st.session_state.get("authenticated", False):
+        st.markdown("### Вход в тестовую версию")
+        with st.form("password_form"):
+            entered_password = st.text_input("Пароль доступа", type="password")
+            submitted = st.form_submit_button("Войти", type="primary")
+        if submitted:
+            if hmac.compare_digest(entered_password, str(pwd)):
+                st.session_state.authenticated = True
+                st.rerun()
+            else:
+                st.error("Пароль не совпадает с APP_PASSWORD в Secrets этого тестового приложения.")
+        st.stop()
 
 st.title("Исследование себя через образы")
 st.caption(
