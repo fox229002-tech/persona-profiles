@@ -309,7 +309,10 @@ if style_file.exists():
 def show_art(filename, width=None):
     path = ASSETS / filename
     if path.exists():
-        st.image(str(path), width=width)
+        if width is None:
+            st.image(str(path))
+        else:
+            st.image(str(path), width=width)
 
 st.markdown("**ОБРАЗЫ**  ·  пространство для исследования себя")
 page = st.radio("Раздел сайта", ["Главная", "Исследование"], horizontal=True, label_visibility="collapsed", key="site_page")
