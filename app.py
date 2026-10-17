@@ -2,11 +2,12 @@ import json
 import random
 import re
 import time
+from pathlib import Path
 
 import requests
 import streamlit as st
 
-st.set_page_config(page_title="Профиль по персонажам", page_icon="🧠")
+st.set_page_config(page_title="Образы — исследование себя", page_icon="🌿", layout="wide")
 
 SYSTEM = "Ты умный и эмпатичный ИИ, помогай пользователю находить себя."
 
@@ -299,11 +300,67 @@ def process_payment(plan_key: str, amount: int) -> bool:
 
 
 # ---------- интерфейс ----------
+# ---------- оформление и навигация ----------
+ASSETS = Path(__file__).parent / "assets"
+style_file = ASSETS / "site.css"
+if style_file.exists():
+    st.markdown("<style>" + style_file.read_text(encoding="utf-8") + "</style>", unsafe_allow_html=True)
+
+def show_art(filename, width=None):
+    path = ASSETS / filename
+    if path.exists():
+        st.image(str(path), width=width)
+
+st.markdown("**ОБРАЗЫ**  ·  пространство для исследования себя")
+page = st.radio("Раздел сайта", ["Главная", "Исследование"], horizontal=True, label_visibility="collapsed", key="site_page")
+
+if page == "Главная":
+    st.markdown('<div class="hero"><span class="hero-kicker">Метафорическое исследование</span><h1>Узнайте себя через образы, которые вам близки</h1><p>Назовите персонажей, с которыми вы себя ассоциируете. Искусственный интеллект создаст обезличенные описания — выберите те, в которых узнаёте себя, и получите персональный разбор.</p></div>', unsafe_allow_html=True)
+    show_art("landscape.svg")
+    if st.button("Начать исследование →", type="primary", key="start_hero"):
+        st.session_state.site_page = "Исследование"
+        st.rerun()
+    st.markdown("## Как это работает")
+    steps = st.columns(4)
+    for col, heading, description in zip(steps,
+        ["01 · Назовите образы", "02 · Прочитайте карточки", "03 · Выберите близкие", "04 · Получите разбор"],
+        ["Введите от одного до трёх персонажей.", "ИИ создаст анонимные описания в случайном порядке.", "Отметьте все карточки, в которых узнаёте себя.", "Получите рекомендации и сохраните результат."]):
+        with col:
+            with st.container(border=True):
+                st.markdown("**" + heading + "**")
+                st.write(description)
+    st.markdown("## Что вы получите")
+    a,b=st.columns([1,1])
+    with a:
+        with st.container(border=True):
+            st.markdown("### Профиль")
+            st.write("Образ жизни, повторяющиеся привычки, возможные перегрузки, рекомендации и книги.")
+            st.markdown("**" + str(PRICE_PROFILE) + " ₽ · тестовая цена**")
+    with b:
+        with st.container(border=True):
+            st.markdown("### Профиль + совместимость")
+            st.write("Профиль и анализ сочетания двух людей: сильные стороны, возможные разногласия и варианты взаимодействия.")
+            st.markdown("**" + str(PRICE_FULL) + " ₽ · тестовая цена**")
+    st.markdown("## О методе")
+    st.write("Это метафорическое упражнение для саморефлексии, а не психологическая диагностика, медицинское заключение или прогноз будущего. Описания создаёт ИИ; пользователь сам решает, какие из них ему близки.")
+    st.markdown("## Частые вопросы")
+    with st.expander("Будут ли названы персонажи в карточках?"):
+        st.write("Нет. Карточки представлены без имён персонажей и перемешаны.")
+    with st.expander("Это психологический тест или терапия?"):
+        st.write("Нет. Это развлекательный и информационный формат саморефлексии.")
+    with st.expander("Можно ли сохранить результат?"):
+        st.write("Да, профиль и анализ совместимости можно скачать в текстовом файле.")
+    with st.expander("Нужно ли платить при тестировании?"):
+        st.write("Нет. Оплата в прототипе имитируется; деньги не списываются.")
+    st.divider()
+    st.caption("18+ · Прототип сервиса «Образы» · Тестовый режим. Юридические документы будут опубликованы после согласования инфраструктуры и условий запуска.")
+    st.stop()
+
 pwd = st.secrets.get("APP_PASSWORD")
 if pwd and st.text_input("Пароль", type="password") != pwd:
     st.stop()
 
-st.title("🧠 Профиль по персонажам")
+st.title("Исследование себя через образы")
 st.caption(
     "Образы создаёт ИИ как метафорические психотипы, а не историческая справка. "
     "Это не диагностика и не медицинская информация."
@@ -313,6 +370,12 @@ tab_profile, tab_compat = st.tabs(["Мой профиль", "Совместим�
 
 # ---- вкладка 1: профиль ----
 with tab_profile:
+    st.markdown("### Ваши образы")
+    a_art, b_art = st.columns(2)
+    with a_art:
+        show_art("woman.svg")
+    with b_art:
+        show_art("man.svg")
     st.info(
         "Введите 1–3 персонажей фильмов, книг или публичных людей, с которыми вы себя ассоциируете. "
         "Если персонаж малоизвестен, укажите в скобках, кто это (откуда он, кем является), "
@@ -403,6 +466,8 @@ with tab_profile:
 
 # ---- вкладка 2: совместимость ----
 with tab_compat:
+    st.markdown("### Два профиля — одна история взаимодействия")
+    show_art("couple.svg")
     plan_now = st.session_state.get("paid_plan")
     if plan_now != "full":
         st.warning("🔒 Разбор совместимости входит в вариант «Профиль + совместимость».")
