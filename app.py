@@ -318,45 +318,57 @@ st.markdown("**ОБРАЗЫ**  ·  пространство для исслед�
 page = st.radio("Раздел сайта", ["Главная", "Исследование"], horizontal=True, label_visibility="collapsed", key="site_page")
 
 if page == "Главная":
-    st.markdown('<div class="hero"><span class="hero-kicker">Метафорическое исследование</span><h1>Узнайте себя через образы, которые вам близки</h1><p>Назовите персонажей, с которыми вы себя ассоциируете. Искусственный интеллект создаст обезличенные описания — выберите те, в которых узнаёте себя, и получите персональный разбор.</p></div>', unsafe_allow_html=True)
-    show_art("landscape.svg")
-    if st.button("Начать исследование →", type="primary", key="start_hero"):
+    # Композиция лендинга — HTML/CSS; исследование остаётся на Streamlit.
+    st.markdown("""
+    <section class="landing-hero">
+      <div class="landing-copy">
+        <div class="landing-kicker"><span class="landing-dot"></span> ПУТЕШЕСТВИЕ К СЕБЕ</div>
+        <h1>Узнайте себя<br>через образы,<br><em>которые вам близки</em></h1>
+        <p>Любимые герои иногда рассказывают о нас больше, чем привычные вопросы. Выберите знакомые образы — и посмотрите на себя с новой стороны.</p>
+        <div class="landing-mini">01 · Образы &nbsp;&nbsp; 02 · Выбор &nbsp;&nbsp; 03 · Ваш профиль</div>
+      </div>
+      <div class="landing-landscape" aria-label="Мягкие холмы и извилистая дорога">
+        <div class="landing-sun"></div>
+        <div class="landing-hill hill-back"></div>
+        <div class="landing-hill hill-middle"></div>
+        <div class="landing-hill hill-front"></div>
+        <svg class="landing-road" viewBox="0 0 500 560" preserveAspectRatio="none" aria-hidden="true"><path d="M220 570 C310 455 400 420 280 330 C160 250 330 200 410 80" fill="none" stroke="#F6F4EF" stroke-width="66" stroke-linecap="round"/><path d="M220 570 C310 455 400 420 280 330 C160 250 330 200 410 80" fill="none" stroke="#E3D6C5" stroke-width="2" stroke-dasharray="10 18"/></svg>
+      </div>
+    </section>
+    """, unsafe_allow_html=True)
+    if st.button("Начать исследование  →", type="primary", key="start_hero"):
         st.session_state.site_page = "Исследование"
         st.rerun()
-    st.markdown("## Как это работает")
-    steps = st.columns(4)
-    for col, heading, description in zip(steps,
-        ["01 · Назовите образы", "02 · Прочитайте карточки", "03 · Выберите близкие", "04 · Получите разбор"],
-        ["Введите от одного до трёх персонажей.", "ИИ создаст анонимные описания в случайном порядке.", "Отметьте все карточки, в которых узнаёте себя.", "Получите рекомендации и сохраните результат."]):
-        with col:
-            with st.container(border=True):
-                st.markdown("**" + heading + "**")
-                st.write(description)
-    st.markdown("## Что вы получите")
-    a,b=st.columns([1,1])
-    with a:
-        with st.container(border=True):
-            st.markdown("### Профиль")
-            st.write("Образ жизни, повторяющиеся привычки, возможные перегрузки, рекомендации и книги.")
-            st.markdown("**" + str(PRICE_PROFILE) + " ₽ · тестовая цена**")
-    with b:
-        with st.container(border=True):
-            st.markdown("### Профиль + совместимость")
-            st.write("Профиль и анализ сочетания двух людей: сильные стороны, возможные разногласия и варианты взаимодействия.")
-            st.markdown("**" + str(PRICE_FULL) + " ₽ · тестовая цена**")
-    st.markdown("## О методе")
-    st.write("Это метафорическое упражнение для саморефлексии, а не психологическая диагностика, медицинское заключение или прогноз будущего. Описания создаёт ИИ; пользователь сам решает, какие из них ему близки.")
-    st.markdown("## Частые вопросы")
-    with st.expander("Будут ли названы персонажи в карточках?"):
-        st.write("Нет. Карточки представлены без имён персонажей и перемешаны.")
+    st.markdown('<div class="landing-section-head"><span>ПРОСТО И ИНТЕРЕСНО</span><h2>Как это работает</h2><p>Три шага, чтобы увидеть себя с неожиданной стороны.</p></div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="landing-steps">
+      <article><span>01</span><h3>Назовите героев</h3><p>Введите от одного до трёх персонажей, с которыми вы себя ассоциируете.</p></article>
+      <article><span>02</span><h3>Узнайте себя</h3><p>Прочитайте анонимные карточки и отметьте те, что вам близки.</p></article>
+      <article><span>03</span><h3>Получите профиль</h3><p>ИИ подготовит разбор выбранных образов и рекомендации.</p></article>
+    </div>
+    <div class="landing-section-head"><span>РЕЗУЛЬТАТ</span><h2>Что вы узнаете</h2></div>
+    <div class="landing-teaser"><div class="landing-teaser-art"><span>✦</span></div><div><h3>Ваш индивидуальный разбор</h3><p>Особенности образа жизни, привычные реакции, возможные перегрузки, способы адаптации и книги для размышления.</p><p class="landing-disclaimer">Это метафорическое исследование, а не психологическая или медицинская диагностика.</p></div></div>
+    <div class="landing-section-head"><span>ВАРИАНТЫ ИССЛЕДОВАНИЯ</span><h2>Выберите свой путь</h2></div>
+    """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="landing-prices">
+      <article><span>ДЛЯ СЕБЯ</span><h3>Мой профиль</h3><p>Исследование ваших образов, рекомендации и сохранение результата.</p><strong>{PRICE_PROFILE} ₽</strong><small>Тестовая цена</small></article>
+      <article class="featured"><span>ДЛЯ ДВОИХ</span><h3>Профиль + совместимость</h3><p>Ваш профиль и разбор сочетания двух людей в выбранном типе отношений.</p><strong>{PRICE_FULL} ₽</strong><small>Тестовая цена</small></article>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("Попробовать бесплатно в деморежиме  →", key="start_bottom"):
+        st.session_state.site_page = "Исследование"
+        st.rerun()
+    st.markdown('<div class="landing-section-head"><span>ВОПРОСЫ И ОТВЕТЫ</span><h2>Перед началом</h2></div>', unsafe_allow_html=True)
     with st.expander("Это психологический тест или терапия?"):
-        st.write("Нет. Это развлекательный и информационный формат саморефлексии.")
+        st.write("Нет. Это информационно-развлекательный формат саморефлексии, а не диагностика или медицинская консультация.")
+    with st.expander("Будут ли известны персонажи по карточкам?"):
+        st.write("Имена персонажей в карточках не показываются, а сами карточки перемешиваются.")
     with st.expander("Можно ли сохранить результат?"):
-        st.write("Да, профиль и анализ совместимости можно скачать в текстовом файле.")
-    with st.expander("Нужно ли платить при тестировании?"):
-        st.write("Нет. Оплата в прототипе имитируется; деньги не списываются.")
-    st.divider()
-    st.caption("18+ · Прототип сервиса «Образы» · Тестовый режим. Юридические документы будут опубликованы после согласования инфраструктуры и условий запуска.")
+        st.write("Да, профиль и анализ совместимости доступны для скачивания в формате .txt.")
+    with st.expander("Списываются ли деньги при тестировании?"):
+        st.write("Нет. В этой версии оплата демонстрационная, без реального списания.")
+    st.markdown('<footer class="landing-footer"><b>ОБРАЗЫ</b><span>Метафорическое исследование себя · 18+ · Демонстрационная версия</span></footer>', unsafe_allow_html=True)
     st.stop()
 
 pwd = st.secrets.get("APP_PASSWORD")
