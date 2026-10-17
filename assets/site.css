@@ -67,3 +67,12 @@ html{scroll-behavior:smooth}#how,#example,#prices,#faq{scroll-margin-top:25px}
 .nav-how{left:26%;top:3%;width:13%;height:10%}.nav-example{left:40%;top:3%;width:9%;height:10%}
 .nav-prices{left:49%;top:3%;width:9%;height:10%}.nav-faq{left:58%;top:3%;width:9%;height:10%}
 .nav-try{left:78%;top:2%;width:16%;height:12%}.hero-try{left:7%;top:68%;width:22%;height:12%}
+
+/* Visible navigation: unlike transparent image hotspots, links can be seen and tested. */
+.site-navigation{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 12px;margin:0 0 10px;background:#F6F4EF;border-radius:16px}
+.site-navigation a{font-size:.88rem;font-weight:550;color:#2B2A33;text-decoration:none;padding:9px 10px;border-radius:18px}
+.site-navigation a:hover{background:#D6E7DE;color:#6E5C8E}
+.site-navigation-brand{font-family:Georgia,serif;font-size:1.35rem;color:#2B2A33;margin-right:auto;padding-right:18px}
+.site-navigation a.site-navigation-cta{background:#6E5C8E;color:#fff;padding:10px 22px}
+.site-navigation a.site-navigation-cta:hover{background:#584974;color:#fff}
+@media(max-width:700px){.site-navigation{justify-content:center}.site-navigation-brand{width:100%;text-align:center;margin:0}}
