@@ -319,24 +319,17 @@ if st.query_params.get("view") == "research":
     st.session_state.site_page = "Исследование"
     st.query_params.clear()
 
-st.markdown("**ОБРАЗЫ**  ·  пространство для исследования себя")
-page = st.radio("Раздел сайта", ["Главная", "Исследование"], horizontal=True, label_visibility="collapsed", key="site_page")
+page = st.session_state.get("site_page", "Главная")
+if page == "Исследование":
+    if st.button("← На главную", key="back_home"):
+        st.session_state.site_page = "Главная"
+        st.rerun()
 
 if page == "Главная":
     # Композиция лендинга — HTML/CSS; исследование остаётся на Streamlit.
     header_path = ASSETS / "header.png"
     if header_path.exists():
         header_data = base64.b64encode(header_path.read_bytes()).decode("ascii")
-        st.markdown("""
-        <nav class="site-navigation" aria-label="Разделы главной страницы">
-          <span class="site-navigation-brand">Образы</span>
-          <a href="#how">Как это работает</a>
-          <a href="#example">Пример</a>
-          <a href="#prices">Тарифы</a>
-          <a href="#faq">Вопросы</a>
-          <a class="site-navigation-cta" href="?view=research">Попробовать →</a>
-        </nav>
-        """, unsafe_allow_html=True)
         st.markdown(f"""
         <div class="exact-header">
           <img src="data:image/png;base64,{header_data}" alt="Образы — исследование себя">
@@ -353,9 +346,6 @@ if page == "Главная":
     else:
         st.info("Добавьте исходное изображение в GitHub: assets/header.png — тогда здесь появится утверждённая шапка.")
         st.markdown('<div class="hero"><h1>Узнайте себя через образы, которые вам близки</h1></div>', unsafe_allow_html=True)
-    if st.button("Начать исследование  →", type="primary", key="start_hero"):
-        st.session_state.site_page = "Исследование"
-        st.rerun()
     st.markdown('<div id="how" class="landing-section-head"><span>ПРОСТО И ИНТЕРЕСНО</span><h2>Как это работает</h2><p>Три шага, чтобы увидеть себя с неожиданной стороны.</p></div>', unsafe_allow_html=True)
     st.markdown("""
     <div class="landing-steps">
