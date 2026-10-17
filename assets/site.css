@@ -1,0 +1,22 @@
+/* Visual foundation for the Streamlit prototype.
+   All selectors are scoped to the app shell where practical. */
+:root { --cream:#F6F4EF; --mint:#D6E7DE; --sage:#8FA89A; --lavender:#B9A9D6; --plum:#6E5C8E; --ink:#2B2A33; }
+.stApp { background:var(--cream); color:var(--ink); }
+.block-container { max-width:1120px; padding-top:2rem; padding-bottom:5rem; }
+h1,h2,h3 { color:var(--ink); letter-spacing:-.025em; }
+h1 { font-size:clamp(2.3rem,5vw,4rem) !important; line-height:1.12 !important; }
+h2 { font-size:clamp(1.6rem,3vw,2.4rem) !important; }
+p { line-height:1.65; }
+div.stButton > button[kind="primary"] { background:var(--plum); color:white; border:0; border-radius:999px; padding:.7rem 1.6rem; }
+div.stButton > button { border-radius:999px; border-color:var(--sage); }
+div[data-testid="stVerticalBlockBorderWrapper"] { border-radius:22px; }
+div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] { color:var(--plum); border-bottom-color:var(--plum); }
+input,textarea { border-radius:12px !important; }
+.hero { background:var(--mint); padding:2.5rem; border-radius:28px; margin-bottom:1.5rem; }
+.hero-kicker { text-transform:uppercase; letter-spacing:.14em; font-size:.75rem; color:var(--plum); font-weight:700; }
+.hero h1 { max-width:720px; margin:.6rem 0 1rem; }
+.hero p { max-width:650px; font-size:1.12rem; }
+.section-eyebrow { font-size:.8rem; letter-spacing:.1em; color:var(--plum); text-transform:uppercase; font-weight:700; }
+.plan-card { background:#fff; border-radius:24px; padding:1.6rem; border:1px solid #e6e1e9; }
+.plan-card.featured { background:#e9e2f3; border-color:var(--lavender); }
+.small-print { font-size:.8rem; opacity:.75; }
