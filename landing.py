@@ -414,6 +414,21 @@ html{scroll-behavior:smooth}
 .ob-example .ob-example-botanical{width:clamp(280px,38%,560px)!important;-webkit-mask-image:linear-gradient(to right,transparent 0%,transparent 77%,#000 98%)!important;mask-image:linear-gradient(to right,transparent 0%,transparent 77%,#000 98%)!important}
 @media(max-width:900px){.ob-example aside{margin-right:40px!important}.ob-example .ob-example-botanical{width:40%!important;opacity:.5!important}}
 @media(max-width:650px){#example h2,#compat-example h2{font-size:30px!important}.ob-example aside{margin-right:0!important;padding:8px 0!important}.ob-example .ob-example-botanical{width:65%!important;opacity:.2!important}.ob-example .ob-example-tagline{margin-bottom:16px}}
+
+/* Align card headings and give benefit rows more breathing room. */
+@media(min-width:901px){
+ .ob-example .ob-example-copy{justify-content:flex-start!important;padding-top:clamp(12px,1.5vw,24px)!important}
+ .ob-example aside{align-self:start!important;padding-top:clamp(12px,1.5vw,24px)!important}
+}
+.ob-example .ob-example-copy h3,.ob-example aside b{
+ font-size:clamp(26px,2.1vw,34px)!important;
+ line-height:1.18!important;
+}
+.ob-example aside li{margin:20px 0!important}
+@media(max-width:900px){
+ .ob-example .ob-example-copy h3,.ob-example aside b{font-size:clamp(24px,3vw,30px)!important}
+ .ob-example aside li{margin:16px 0!important}
+}
 </style>
 """
 
