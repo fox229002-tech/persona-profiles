@@ -836,22 +836,24 @@ def render_landing(price_profile: int, price_full: int):
       </div>
     </div>
     """, unsafe_allow_html=True)
-    # Footer documents: support drafts with varying PDF filenames in assets.
-    pdfs = sorted(ASSETS.glob("*.pdf"))
+    # Footer documents: support Word drafts and PDF files in assets.
+    documents = sorted(p for p in ASSETS.iterdir() if p.is_file() and p.suffix.lower() in (".docx", ".pdf"))
     def footer_doc(names):
         for name in names:
             exact = ASSETS / name
             if exact.is_file():
                 return exact
-        return next((p for p in pdfs if any(key in p.stem.lower() for key in names)), None)
+        return next((p for p in documents if any(key in p.stem.lower() for key in names)), None)
 
-    oferta = footer_doc(("oferta.pdf", "оферта", "oferta", "offer"))
-    privacy = footer_doc(("privacy.pdf", "политик", "privacy", "personal", "персональ"))
+    oferta = footer_doc(("oferta.docx", "оферта", "oferta", "offer"))
+    privacy = footer_doc(("privacy.docx", "политик", "privacy", "personal", "персональ"))
     def footer_link(label, path):
         if path is None:
             return f'<span class="ob-footer-unavailable">{html.escape(label)} (файл не найден)</span>'
         encoded = base64.b64encode(path.read_bytes()).decode("ascii")
-        return (f'<a href="data:application/pdf;base64,{encoded}" '
+        mime = ("application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                if path.suffix.lower() == ".docx" else "application/pdf")
+        return (f'<a href="data:{mime};base64,{encoded}" '
                 f'download="{html.escape(path.name, quote=True)}">{html.escape(label)} ↓</a>')
 
     st.markdown(f"""
