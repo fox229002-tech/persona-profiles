@@ -243,6 +243,19 @@ html{scroll-behavior:smooth}
  #how .ob-compat-new .ob-compat-body{padding-left:0;padding-right:0}
  #how .ob-compat-new .ob-compat-steps{grid-template-columns:1fr}
 }
+/* Align the four step descriptions to a shared baseline without moving the icons. */
+#how .ob-step{display:flex;flex-direction:column}
+#how .ob-step h3{min-height:0!important;margin-bottom:0!important}
+#how .ob-step p{margin-top:12px!important}
+@media(min-width:901px){
+ #how .ob-step h3{height:96px;overflow:visible}
+}
+@media(min-width:651px) and (max-width:900px){
+ #how .ob-step h3{height:78px}
+}
+@media(max-width:650px){
+ #how .ob-step h3{height:76px}
+}
 </style>
 """
 
