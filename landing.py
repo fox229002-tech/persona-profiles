@@ -676,11 +676,20 @@ html{scroll-behavior:smooth}
 .ob-faq summary::-webkit-details-marker{display:none}
 .ob-faq summary::before{content:"";display:inline-block;flex:0 0 8px;width:8px;height:8px;border-right:2px solid #6E5C8E;border-bottom:2px solid #6E5C8E;transform:rotate(-45deg);transition:transform .2s ease}
 .ob-faq details[open] > summary::before{transform:rotate(45deg)}
-/* Align FAQ question block with about copy below the two-line heading */
+/* Both columns reserve the same heading row at every desktop zoom level. */
 @media(min-width:901px){
- .ob-two .ob-section > h2{min-height:2.2em!important;box-sizing:content-box}
- .ob-two .ob-faq > details:first-of-type{margin-top:0!important;padding-top:0!important}
+ .ob-two .ob-section > h2{
+  height:2.4em!important;
+  min-height:0!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+ }
+ .ob-two .ob-about img{margin-top:0!important}
  .ob-two .ob-about > p:first-of-type{margin-top:0!important}
+ .ob-two .ob-faq > details:first-of-type{
+  margin-top:0!important;
+  padding-top:0!important;
+ }
 }
 .ob-two .ob-faq summary{font-size:17px!important;line-height:1.7!important}
 </style>
