@@ -451,6 +451,32 @@ html{scroll-behavior:smooth}
  line-height:1.18!important;
  letter-spacing:normal!important;
 }
+
+/* Responsive result cards: headings share one top baseline and right title has room. */
+@media(min-width:901px){
+ .ob-example,.ob-example-compat{
+  grid-template-columns:minmax(0,29%) minmax(0,1fr) minmax(265px,30%)!important;
+  align-items:center!important;
+ }
+ .ob-example .ob-example-copy{
+  align-self:start!important;
+  padding-top:0!important;
+ }
+ .ob-example aside{
+  align-self:start!important;
+  margin-right:0!important;
+  padding:0!important;
+  min-width:0!important;
+ }
+ .ob-example .ob-example-copy h3,
+ .ob-example aside > b{
+  font:600 clamp(24px,1.9vw,31px)/1.2 Georgia,serif!important;
+  margin:0 0 18px!important;
+  padding:0!important;
+ }
+ .ob-example aside > b{white-space:nowrap!important}
+ .ob-example aside ul{margin-top:16px!important}
+}
 </style>
 """
 
