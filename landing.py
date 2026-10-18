@@ -323,12 +323,16 @@ html{scroll-behavior:smooth}
 .ob-example aside ul{margin-bottom:0}
 .ob-example .ob-example-botanical{
  position:absolute!important;z-index:1!important;
- width:clamp(340px,43%,640px)!important;
- height:auto!important;max-height:none!important;
- right:-2%;bottom:-8%;
+ width:clamp(360px,46%,650px)!important;
+ height:100%!important;max-height:none!important;
+ object-fit:cover!important;
+ object-position:right center!important;
+ right:0;bottom:0;
  border-radius:0!important;
  pointer-events:none;
- opacity:.82;
+ opacity:1;
+ -webkit-mask-image:linear-gradient(to right,transparent 0%,transparent 65%,#000 94%);
+ mask-image:linear-gradient(to right,transparent 0%,transparent 65%,#000 94%);
 }
 @media(min-width:901px){
  .ob-example aside{margin-right:clamp(22px,3vw,42px)}
@@ -336,13 +340,13 @@ html{scroll-behavior:smooth}
 @media(max-width:900px){
  .ob-example,.ob-example-compat{grid-template-columns:minmax(0,35%) minmax(0,1fr)}
  .ob-example aside{grid-column:2}
- .ob-example .ob-example-botanical{width:45%!important;opacity:.55}
+ .ob-example .ob-example-botanical{width:45%!important;opacity:.65}
 }
 @media(max-width:650px){
  .ob-example,.ob-example-compat{grid-template-columns:minmax(0,1fr);gap:18px}
  .ob-example > img:first-child{width:min(100%,330px);margin-inline:auto}
  .ob-example aside{grid-column:auto;margin-right:0}
- .ob-example .ob-example-botanical{width:75%!important;right:-18%!important;bottom:-5%!important;opacity:.25}
+ .ob-example .ob-example-botanical{width:75%!important;right:0!important;bottom:0!important;opacity:.35}
 }
 </style>
 """
