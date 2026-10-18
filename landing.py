@@ -462,7 +462,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Совместимость»</h2>
         <div class="ob-example ob-example-compat">
           {img("primer_sovmestimost.webp", "Иллюстрация совместимости")}
-          <div class="ob-example-copy"><h3>Два профиля — один союз</h3><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера совместимости пока не предоставлен. Добавим утверждённый пример.</div></details></div>
+          <div class="ob-example-copy"><h3>Два профиля —<br>один союз</h3><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера совместимости пока не предоставлен. Добавим утверждённый пример.</div></details></div>
           <aside><b>В разборе</b><ul><li>Точки соприкосновения</li><li>Возможные противоречия</li><li>Сценарии взаимодействия</li><li>Практические рекомендации</li></ul></aside>
           {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
