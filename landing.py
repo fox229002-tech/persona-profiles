@@ -256,6 +256,21 @@ html{scroll-behavior:smooth}
 @media(max-width:650px){
  #how .ob-step h3{height:76px}
 }
+/* Compatibility: stable left alignment at all desktop zoom levels.
+   Reserve the right botanical edge instead of centering the copy. */
+@media(min-width:901px){
+ #how .ob-compat-new .ob-compat-body{
+  padding-left:20%!important;
+  padding-right:9%!important;
+  width:100%!important;
+  margin:0!important;
+ }
+ #how .ob-compat-new .ob-compat-steps{
+  grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) minmax(0,.72fr)!important;
+  gap:20px!important;
+ }
+ #how .ob-compat-new .ob-compat-step p{overflow-wrap:break-word}
+}
 </style>
 """
 
