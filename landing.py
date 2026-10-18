@@ -183,10 +183,11 @@ html{scroll-behavior:smooth}
    Browser zoom may reflow the heading, but the CTA stays at the same
    proportional distance from the bottom and left edges. */
 @media(min-width:901px){
+ .ob-hero .ob-hero-content{position:static!important}
  .ob-hero .ob-cta{
   position:absolute!important;
   left:4%!important;
-  bottom:0!important;
+  bottom:4%!important;
   margin:0!important;
   z-index:6;
  }
