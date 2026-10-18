@@ -179,6 +179,19 @@ html{scroll-behavior:smooth}
 @media(max-width:900px){#how .ob-grid4{gap:22px!important}#how .ob-step-top{gap:12px}#how .ob-step h3{font-size:19px!important}}
 @media(max-width:650px){#how .ob-step-top{height:72px}#how .ob-step-top img{width:60px;height:60px}#how .ob-step-top .ob-step-number{width:40px;height:40px;flex-basis:40px;font-size:20px}#how .ob-step h3{min-height:0}}
 
+/* Desktop hero CTA is anchored to the illustration, not to text height.
+   Browser zoom may reflow the heading, but the CTA stays at the same
+   proportional distance from the bottom and left edges. */
+@media(min-width:901px){
+ .ob-hero .ob-cta{
+  position:absolute!important;
+  left:4%!important;
+  bottom:4.5%!important;
+  margin:0!important;
+  z-index:6;
+ }
+}
+
 /* Keep botanical artwork at its native aspect ratio: zoom and text
    wrapping must not make the flowers grow to fill a taller card. */
 #how .ob-compat-new .ob-compat-art{
