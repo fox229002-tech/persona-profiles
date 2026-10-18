@@ -676,6 +676,8 @@ html{scroll-behavior:smooth}
 .ob-faq summary::-webkit-details-marker{display:none}
 .ob-faq summary::before{content:"";display:inline-block;flex:0 0 8px;width:8px;height:8px;border-right:2px solid #6E5C8E;border-bottom:2px solid #6E5C8E;transform:rotate(-45deg);transition:transform .2s ease}
 .ob-faq details[open] > summary::before{transform:rotate(45deg)}
+/* Align FAQ question block with about copy below the two-line heading */
+@media(min-width:901px){.ob-two .ob-faq > details:first-of-type{margin-top:42px!important}}
 </style>
 """
 
