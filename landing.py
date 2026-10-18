@@ -476,6 +476,9 @@ html{scroll-behavior:smooth}
  }
  .ob-example aside > b{white-space:nowrap!important}
  .ob-example aside ul{margin-top:16px!important}
+ /* Reserve the ornamental right edge without changing the heading baseline. */
+ .ob-example aside ul{max-width:calc(100% - clamp(48px,5vw,90px))!important}
+ .ob-example aside li{overflow-wrap:break-word}
 }
 </style>
 """
