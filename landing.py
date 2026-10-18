@@ -554,6 +554,14 @@ html{scroll-behavior:smooth}
 .ob-price .ob-price-lines{margin-top:0!important;margin-bottom:12px!important}
 .ob-price strong{margin-top:0!important}
 .ob-price a{margin-top:10px!important}
+
+/* Tariff cards: prevent price and CTA from escaping the fixed-ratio artwork */
+.ob-price{display:flex!important;flex-direction:column!important;justify-content:flex-start!important;gap:0!important;aspect-ratio:1.7/1!important;box-sizing:border-box!important}
+.ob-price h3{flex:0 0 auto!important;margin:0 0 14px!important}
+.ob-price .ob-price-lines{flex:0 0 auto!important;margin:0 0 12px!important}
+.ob-price strong{display:block!important;flex:0 0 auto!important;margin:0 0 10px!important;line-height:1.1!important}
+.ob-price a{flex:0 0 auto!important;margin:0!important;align-self:flex-start!important}
+@media(max-width:700px){.ob-price{aspect-ratio:auto!important;min-height:330px!important}}
 </style>
 """
 
