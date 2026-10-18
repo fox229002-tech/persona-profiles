@@ -243,18 +243,25 @@ html{scroll-behavior:smooth}
  #how .ob-compat-new .ob-compat-body{padding-left:0;padding-right:0}
  #how .ob-compat-new .ob-compat-steps{grid-template-columns:1fr}
 }
-/* Align the four step descriptions to a shared baseline without moving the icons. */
-#how .ob-step{display:flex;flex-direction:column}
-#how .ob-step h3{min-height:0!important;margin-bottom:0!important}
-#how .ob-step p{margin-top:12px!important}
-@media(min-width:901px){
- #how .ob-step h3{height:96px;overflow:visible}
+/* Step layout: intrinsic heading heights; CSS subgrid aligns descriptions
+   to the tallest heading in each row without fixed-height overlap. */
+#how .ob-grid4{grid-template-rows:repeat(3,auto);row-gap:0!important;align-items:stretch}
+#how .ob-step{
+ display:grid!important;
+ grid-template-rows:subgrid;
+ grid-row:span 3;
+ align-content:start;
+ row-gap:0;
 }
-@media(min-width:651px) and (max-width:900px){
- #how .ob-step h3{height:78px}
+#how .ob-step h3{
+ height:auto!important;
+ min-height:0!important;
+ margin:0!important;
+ overflow:visible!important;
 }
-@media(max-width:650px){
- #how .ob-step h3{height:76px}
+#how .ob-step p{margin:14px 0 0!important}
+@media(max-width:900px){
+ #how .ob-grid4{grid-template-rows:repeat(6,auto);row-gap:0!important}
 }
 /* Compatibility: protect the botanical edges and give all three steps
    readable columns across desktop browser zoom levels. */
