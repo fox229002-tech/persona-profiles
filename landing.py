@@ -530,7 +530,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Профиль»</h2>
         <div class="ob-example">
           {img("primer_profile.webp", "Иллюстрация профиля")}
-          <div class="ob-example-copy"><h3>Профиль личности</h3><div class="ob-example-tagline">Ваши особенности — ваш ресурс</div><p>Исследуйте особенности своего характера через близкие вам образы<br>Узнайте, какие качества помогают вам справляться с задачами, как проявляются привычные реакции и что может становиться источником перегрузки</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера профиля пока не предоставлен. Добавим утверждённый пример без вымышленных результатов.</div></details></div>
+          <div class="ob-example-copy"><h3>Профиль личности</h3><div class="ob-example-tagline">Ваши особенности — ваш ресурс</div><p>Исследуйте особенности своего характера через близкие вам образы<br>Узнайте, какие качества помогают вам справляться с задачами, как проявляются привычные реакции и что может становиться источником перегрузки</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера профиля пока не предоставлен<br>Добавим утверждённый пример без вымышленных результатов</div></details></div>
           <aside><b>Что вы узнаете</b><ul><li>Сильные стороны и ресурсы</li><li>Привычные реакции</li><li>Зоны перегрузки</li><li>Рекомендации для повседневной жизни</li></ul></aside>
           {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
@@ -543,7 +543,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Совместимость»</h2>
         <div class="ob-example ob-example-compat">
           {img("primer_sovmestimost.webp", "Иллюстрация совместимости")}
-          <div class="ob-example-copy"><h3>Два профиля —<br>один союз</h3><div class="ob-example-tagline">Понять друг друга глубже</div><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера совместимости пока не предоставлен. Добавим утверждённый пример.</div></details></div>
+          <div class="ob-example-copy"><h3>Два профиля —<br>один союз</h3><div class="ob-example-tagline">Понять друг друга глубже</div><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера совместимости пока не предоставлен<br>Добавим утверждённый пример</div></details></div>
           <aside><b>В разборе</b><ul><li>Точки соприкосновения</li><li>Возможные противоречия</li><li>Сценарии взаимодействия</li><li>Практические рекомендации</li></ul></aside>
           {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
