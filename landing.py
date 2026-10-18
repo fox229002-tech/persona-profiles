@@ -166,6 +166,18 @@ html{scroll-behavior:smooth}
 #how .ob-compat-new .ob-compat-step p{margin:5px 0 0!important}
 @media(max-width:900px){#how .ob-step img{margin-left:0}#how .ob-step p{margin-left:0}#how .ob-compat-new{padding-bottom:110px!important}}
 @media(max-width:650px){#how .ob-step h3{gap:8px}#how .ob-step-number{flex-basis:34px;width:34px;height:34px;font-size:18px}#how .ob-compat-new{padding:24px 20px 95px!important}#how .ob-compat-new .ob-compat-steps{grid-template-columns:1fr;gap:14px}#how .ob-compat-new .ob-compat-art{opacity:.35}}
+
+/* Step layout: number and illustration share a row, all copy left aligned */
+#how .ob-grid4{gap:34px!important;align-items:start}
+#how .ob-step{padding:0!important}
+#how .ob-step-top{display:flex;align-items:center;gap:22px;height:90px;margin-bottom:12px}
+#how .ob-step-top .ob-step-number{display:flex;align-items:center;justify-content:center;flex:0 0 52px;width:52px;height:52px;margin:0!important;background:#6e9989;color:#fff;border-radius:50%;font:600 25px Georgia,serif}
+#how .ob-step-top img{display:block;width:80px;height:80px;margin:0!important;object-fit:contain}
+#how .ob-step h3{display:block!important;margin:0 0 12px!important;font:600 22px/1.2 Georgia,serif!important;min-height:55px}
+#how .ob-step p{margin:0!important;font-size:16px;line-height:1.55;max-width:265px}
+#how .ob-compat-new{padding-bottom:165px!important}
+@media(max-width:900px){#how .ob-grid4{gap:22px!important}#how .ob-step-top{gap:12px}#how .ob-step h3{font-size:19px!important}}
+@media(max-width:650px){#how .ob-step-top{height:72px}#how .ob-step-top img{width:60px;height:60px}#how .ob-step-top .ob-step-number{width:40px;height:40px;flex-basis:40px;font-size:20px}#how .ob-step h3{min-height:0}}
 </style>
 """
 
@@ -193,10 +205,10 @@ def render_landing(price_profile: int, price_full: int):
       <section class="ob-section" id="how">
         <h2>Как это работает?</h2>
         <div class="ob-grid4">
-          <article class="ob-step">{img("01_obraz.svg", "Первый этап")}<h3><span class="ob-step-number">1</span> Назовите близкие образы</h3><p>Напишите имена персонажей, героев или известных людей, которые вам близки.</p></article>
-          <article class="ob-step">{img("02_profili.svg", "Второй этап")}<h3><span class="ob-step-number">2</span> Получите описания профилей</h3><p>Познакомьтесь с несколькими обезличенными описаниями.</p></article>
-          <article class="ob-step">{img("03_vybor.svg", "Третий этап")}<h3><span class="ob-step-number">3</span> Отметьте своё</h3><p>Выберите один или несколько подходящих профилей.</p></article>
-          <article class="ob-step">{img("04_razbor.svg", "Четвёртый этап")}<h3><span class="ob-step-number">4</span> Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации.</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">1</span>{img("01_obraz.svg", "Первый этап")}</div><h3>Назовите близкие образы</h3><p>Напишите имена персонажей, героев или известных людей, которые вам близки.</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">2</span>{img("02_profili.svg", "Второй этап")}</div><h3>Получите описания профилей</h3><p>Познакомьтесь с несколькими обезличенными описаниями.</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">3</span>{img("03_vybor.svg", "Третий этап")}</div><h3>Отметьте своё</h3><p>Выберите один или несколько подходящих профилей.</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">4</span>{img("04_razbor.svg", "Четвёртый этап")}</div><h3>Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации.</p></article>
         </div>
         <div class="ob-compat ob-compat-new">
           {img("etapi_sovmestimost.webp", "Декоративные травы и холмы", "ob-compat-art")}
