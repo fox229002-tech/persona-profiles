@@ -186,7 +186,7 @@ html{scroll-behavior:smooth}
  .ob-hero .ob-cta{
   position:absolute!important;
   left:4%!important;
-  bottom:-8%!important;
+  bottom:0!important;
   margin:0!important;
   z-index:6;
  }
