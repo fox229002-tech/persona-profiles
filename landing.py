@@ -846,7 +846,7 @@ def render_landing(price_profile: int, price_full: int):
         return next((p for p in documents if any(key in p.stem.lower() for key in names)), None)
 
     oferta = footer_doc(("oferta.docx", "оферта", "oferta", "offer"))
-    privacy = footer_doc(("privacy.docx", "политик", "privacy", "personal", "персональ"))
+    privacy = footer_doc(("politika.docx", "privacy.docx", "politika", "политик", "privacy", "personal", "персональ"))
     def footer_link(label, path):
         if path is None:
             return f'<span class="ob-footer-unavailable">{html.escape(label)} (файл не найден)</span>'
