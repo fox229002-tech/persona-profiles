@@ -562,6 +562,12 @@ html{scroll-behavior:smooth}
 .ob-price strong{display:block!important;flex:0 0 auto!important;margin:0 0 10px!important;line-height:1.1!important}
 .ob-price a{flex:0 0 auto!important;margin:0!important;align-self:flex-start!important}
 @media(max-width:700px){.ob-price{aspect-ratio:auto!important;min-height:330px!important}}
+
+/* Tariff content: raise all elements 0.5cm, then everything below title a further 1.2cm */
+@media(min-width:701px){
+ .ob-price{padding-top:calc(25px - 0.5cm)!important}
+ .ob-price h3{margin-bottom:calc(14px - 1.2cm)!important}
+}
 </style>
 """
 
