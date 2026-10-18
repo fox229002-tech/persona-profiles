@@ -129,6 +129,9 @@ html{scroll-behavior:smooth}
   .ob-hero .ob-nav{top:12px!important}
   .ob-hero .ob-hero-content{padding-top:68px!important}
 }
+
+/* Lift only heading and description; keep CTA on the cream foreground */
+@media(min-width:901px){.ob-hero .ob-hero-content h1,.ob-hero .ob-hero-content>p{position:relative;top:-20px}}
 </style>
 """
 
