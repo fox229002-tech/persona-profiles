@@ -677,7 +677,7 @@ html{scroll-behavior:smooth}
 .ob-faq summary::before{content:"";display:inline-block;flex:0 0 8px;width:8px;height:8px;border-right:2px solid #6E5C8E;border-bottom:2px solid #6E5C8E;transform:rotate(-45deg);transition:transform .2s ease}
 .ob-faq details[open] > summary::before{transform:rotate(45deg)}
 /* FAQ anchor lives on the existing rendered FAQ body, without adding a grid item. */
-.ob-faq-body#faq{scroll-margin-top:110px}
+.ob-faq-body#faq{scroll-margin-top:240px!important}
 /* Shared grid rows: headings and content align at every desktop zoom. */
 @media(min-width:901px){
  .ob-two{
