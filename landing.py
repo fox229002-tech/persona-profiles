@@ -676,20 +676,33 @@ html{scroll-behavior:smooth}
 .ob-faq summary::-webkit-details-marker{display:none}
 .ob-faq summary::before{content:"";display:inline-block;flex:0 0 8px;width:8px;height:8px;border-right:2px solid #6E5C8E;border-bottom:2px solid #6E5C8E;transform:rotate(-45deg);transition:transform .2s ease}
 .ob-faq details[open] > summary::before{transform:rotate(45deg)}
-/* Both columns reserve the same heading row at every desktop zoom level. */
+/* Shared grid rows: headings and content align at every desktop zoom. */
 @media(min-width:901px){
+ .ob-two{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  grid-template-rows:auto auto;
+  column-gap:45px;
+  row-gap:0;
+  align-items:start;
+  padding:48px 4% 15px;
+ }
+ .ob-two > .ob-section{display:contents}
+ .ob-two .ob-about > h2{grid-column:1;grid-row:1}
+ .ob-two .ob-faq > h2{grid-column:2;grid-row:1}
  .ob-two .ob-section > h2{
-  height:2.4em!important;
-  min-height:0!important;
-  margin:0!important;
-  box-sizing:border-box!important;
+  height:auto!important;min-height:0!important;
+  margin:0 0 26px!important;
  }
- .ob-two .ob-about img{margin-top:0!important}
- .ob-two .ob-about > p:first-of-type{margin-top:0!important}
- .ob-two .ob-faq > details:first-of-type{
-  margin-top:0!important;
-  padding-top:0!important;
+ .ob-two .ob-about-body{grid-column:1;grid-row:2;min-width:0}
+ .ob-two .ob-faq-body{grid-column:2;grid-row:2;min-width:0}
+ .ob-two .ob-about-body > p:first-of-type{margin-top:0!important}
+ .ob-two .ob-about-body > img{margin-top:0!important}
+ .ob-two .ob-faq-body > details:first-of-type{
+  margin-top:0!important;padding-top:0!important;
  }
+}
+@media(max-width:900px){
+ .ob-two .ob-about-body,.ob-two .ob-faq-body{display:flow-root}
 }
 .ob-two .ob-faq summary{font-size:17px!important;line-height:1.7!important}
 </style>
@@ -774,15 +787,18 @@ def render_landing(price_profile: int, price_full: int):
       <div class="ob-two">
         <section class="ob-section ob-about" id="about">
           <h2>Почему именно образы?</h2>
+          <div class="ob-about-body">
           {img("cvetok.png", "Цветок")}
           <p>Образ позволяет передать гораздо больше информации, чем человек способен выразить словами</p>
           <p>Образы становятся отправной точкой для размышлений о привычках, реакциях и особенностях характера, которые определяют взаимодействие человека с окружающим миром</p>
+          </div>
         </section>
         <section class="ob-section ob-faq" id="faq"><h2>Частые вопросы</h2>
+        <div class="ob-faq-body">
 <details><summary>Это психологический тест или терапия?</summary><p>Нет. Это метафорическое исследование для саморефлексии, а не диагностика или медицинская консультация.</p></details>
 <details><summary>Будут ли известны персонажи по карточкам?</summary><p>Имена персонажей в карточках не показываются, а сами карточки перемешиваются.</p></details>
 <details><summary>Можно ли сохранить результат?</summary><p>Да, результаты можно скачать в формате TXT.</p></details>
-<details><summary>Списываются ли деньги при тестировании?</summary><p>Нет. В текущей тестовой версии оплата демонстрационная.</p></details></section>
+<details><summary>Списываются ли деньги при тестировании?</summary><p>Нет. В текущей тестовой версии оплата демонстрационная.</p></details></div></section>
       </div>
     </div>
     """, unsafe_allow_html=True)
