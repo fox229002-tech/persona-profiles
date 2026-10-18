@@ -178,6 +178,16 @@ html{scroll-behavior:smooth}
 #how .ob-compat-new{padding-bottom:165px!important}
 @media(max-width:900px){#how .ob-grid4{gap:22px!important}#how .ob-step-top{gap:12px}#how .ob-step h3{font-size:19px!important}}
 @media(max-width:650px){#how .ob-step-top{height:72px}#how .ob-step-top img{width:60px;height:60px}#how .ob-step-top .ob-step-number{width:40px;height:40px;flex-basis:40px;font-size:20px}#how .ob-step h3{min-height:0}}
+
+/* Fine typography and horizontal alignment adjustments */
+@media(min-width:901px){
+ #how .ob-step h3{font-size:27px!important;line-height:1.16!important;min-height:66px}
+ #how .ob-compat-new .ob-compat-body{transform:translateX(56px);max-width:calc(100% - 155px)!important}
+}
+@media(min-width:651px) and (max-width:900px){
+ #how .ob-step h3{font-size:23px!important;line-height:1.2!important}
+ #how .ob-compat-new .ob-compat-body{transform:translateX(24px);max-width:calc(100% - 70px)!important}
+}
 </style>
 """
 
