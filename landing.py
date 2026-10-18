@@ -97,6 +97,17 @@ html{scroll-behavior:smooth}
 .ob-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;background:#eee9e5;padding:25px 3%;border:0}
 @media(max-width:900px){.ob-hero{aspect-ratio:auto;min-height:470px}.ob-example{grid-template-columns:35% 1fr}.ob-example aside{grid-column:1/-1}}
 @media(max-width:650px){.block-container{padding-left:1rem!important;padding-right:1rem!important}.ob-hero{min-height:590px}.ob-hero-content{width:100%;padding:45px 7%}.ob-hero-image{opacity:.5}.ob-grid4{grid-template-columns:repeat(2,1fr)}.ob-example{grid-template-columns:1fr}.ob-example aside{grid-column:auto}.ob-two{grid-template-columns:1fr}.ob-price h3,.ob-price p,.ob-price strong,.ob-price a{max-width:75%}}
+
+/* Header navigation: positioned inside hero, not above it */
+.ob-hero{position:relative}
+.ob-hero .ob-nav{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:10px;padding:20px 4%;flex-wrap:nowrap}
+.ob-hero .ob-logo{margin-right:auto;color:#5E4A7B;font:600 29px Georgia,serif;white-space:nowrap}
+.ob-hero .ob-nav a{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none!important;font-size:14px;font-weight:600;color:#3B3445;background:rgba(246,244,239,.76);border:1px solid rgba(110,92,142,.15);border-radius:999px;padding:10px 17px;transition:background .18s ease,transform .18s ease}
+.ob-hero .ob-nav a:hover{background:#E9DFF0;color:#5E4A7B;text-decoration:none!important;transform:translateY(-1px)}
+.ob-hero .ob-nav a:focus-visible{outline:3px solid #6E5C8E;outline-offset:3px}
+.ob-hero .ob-hero-content{padding-top:11%}
+@media(max-width:900px){.ob-hero .ob-nav{gap:7px;padding:14px 3%}.ob-hero .ob-nav a{padding:8px 10px;font-size:12px}.ob-hero .ob-logo{font-size:24px}.ob-hero .ob-hero-content{padding-top:100px}}
+@media(max-width:650px){.ob-hero .ob-nav{position:relative;flex-wrap:wrap;justify-content:center;padding:14px 4%;background:rgba(214,231,222,.88)}.ob-hero .ob-logo{width:100%;text-align:center;margin:0 0 5px}.ob-hero .ob-nav a{font-size:12px}.ob-hero .ob-hero-content{padding-top:40px}.ob-hero{min-height:640px}}
 </style>
 """
 
@@ -104,6 +115,8 @@ def render_landing(price_profile: int, price_full: int):
     st.markdown(CSS, unsafe_allow_html=True)
     st.markdown(f"""
     <div class="ob-page">
+      <header class="ob-hero">
+        {img("header.webp", "Девушка среди холмов", "ob-hero-image")}
       <nav class="ob-nav" aria-label="Навигация">
         <span class="ob-logo">Образы</span>
         <a href="#how">Как это работает</a>
@@ -111,8 +124,6 @@ def render_landing(price_profile: int, price_full: int):
         <a href="#prices">Тарифы</a>
         <a href="#faq">Вопросы</a>
       </nav>
-      <header class="ob-hero">
-        {img("header.webp", "Девушка среди холмов", "ob-hero-image")}
         <div class="ob-hero-content">
           <h1>Узнайте себя через образы, которые вам близки</h1>
           <p>Необычный способ исследовать свою личность,<br>
