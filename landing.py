@@ -676,9 +676,8 @@ html{scroll-behavior:smooth}
 .ob-faq summary::-webkit-details-marker{display:none}
 .ob-faq summary::before{content:"";display:inline-block;flex:0 0 8px;width:8px;height:8px;border-right:2px solid #6E5C8E;border-bottom:2px solid #6E5C8E;transform:rotate(-45deg);transition:transform .2s ease}
 .ob-faq details[open] > summary::before{transform:rotate(45deg)}
-/* FAQ anchor: independent grid item, not a heading inside display:contents. */
-.ob-faq-anchor{display:block;height:0;min-height:0;scroll-margin-top:32px}
-@media(min-width:901px){.ob-two .ob-faq-anchor{grid-column:2;grid-row:1;align-self:start;justify-self:start}}
+/* FAQ anchor lives on the existing rendered FAQ body, without adding a grid item. */
+.ob-faq-body#faq{scroll-margin-top:110px}
 /* Shared grid rows: headings and content align at every desktop zoom. */
 @media(min-width:901px){
  .ob-two{
@@ -796,8 +795,8 @@ def render_landing(price_profile: int, price_full: int):
           <p>Образы становятся отправной точкой для размышлений о привычках, реакциях и особенностях характера, которые определяют взаимодействие человека с окружающим миром</p>
           </div>
         </section>
-        <section class="ob-section ob-faq"><span id="faq" class="ob-faq-anchor" aria-hidden="true"></span><h2>Частые вопросы</h2>
-        <div class="ob-faq-body">
+        <section class="ob-section ob-faq"><h2>Частые вопросы</h2>
+        <div class="ob-faq-body" id="faq">
 <details><summary>Это психологический тест или гадание на кофейной гуще?</summary>
 <p>Ни то ни другое.</p>
 <p>Изначально автор не планировал создавать тест. Исследование началось с попытки разобраться в собственных особенностях, негативно влияющих на здоровье и психологическое благополучие, и найти способы преодоления связанных с ними трудностей.</p>
