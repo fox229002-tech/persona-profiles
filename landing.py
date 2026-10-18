@@ -179,14 +179,30 @@ html{scroll-behavior:smooth}
 @media(max-width:900px){#how .ob-grid4{gap:22px!important}#how .ob-step-top{gap:12px}#how .ob-step h3{font-size:19px!important}}
 @media(max-width:650px){#how .ob-step-top{height:72px}#how .ob-step-top img{width:60px;height:60px}#how .ob-step-top .ob-step-number{width:40px;height:40px;flex-basis:40px;font-size:20px}#how .ob-step h3{min-height:0}}
 
-/* Fine typography and horizontal alignment adjustments */
+/* Responsive composition: align all compatibility copy within one
+   proportional inner column, never shift it with a fixed pixel transform. */
+#how .ob-compat-new .ob-compat-body{
+ transform:none!important;
+ width:100%;
+ max-width:none!important;
+ margin:0!important;
+ padding-left:19%;
+ padding-right:3%;
+ box-sizing:border-box;
+}
+#how .ob-compat-new .ob-compat-steps{
+ grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,.8fr);
+}
 @media(min-width:901px){
  #how .ob-step h3{font-size:27px!important;line-height:1.16!important;min-height:66px}
- #how .ob-compat-new .ob-compat-body{transform:translateX(207px);max-width:870px!important;margin-left:0!important;margin-right:0!important}
 }
 @media(min-width:651px) and (max-width:900px){
  #how .ob-step h3{font-size:23px!important;line-height:1.2!important}
- #how .ob-compat-new .ob-compat-body{transform:translateX(24px);max-width:calc(100% - 48px)!important;margin-left:0!important;margin-right:0!important}
+ #how .ob-compat-new .ob-compat-body{padding-left:13%;padding-right:2%}
+}
+@media(max-width:650px){
+ #how .ob-compat-new .ob-compat-body{padding-left:0;padding-right:0}
+ #how .ob-compat-new .ob-compat-steps{grid-template-columns:1fr}
 }
 </style>
 """
