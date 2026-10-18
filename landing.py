@@ -264,7 +264,7 @@ def render_landing(price_profile: int, price_full: int):
         <div class="ob-grid4">
           <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">1</span>{img("01_obraz.svg", "Первый этап")}</div><h3>Назовите близкие образы</h3><p>Напишите имена персонажей, героев или известных людей, которые вам близки</p></article>
           <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">2</span>{img("02_profili.svg", "Второй этап")}</div><h3>Получите описания профилей</h3><p>Познакомьтесь с несколькими обезличенными описаниями</p></article>
-          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">3</span>{img("03_vybor.svg", "Третий этап")}</div><h3>Отметьте своё</h3><p>Выберите один или несколько подходящих профилей</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">3</span>{img("03_vybor.svg", "Третий этап")}</div><h3>Отметьте своё</h3><p>Выберите одно или несколько подходящих описаний</p></article>
           <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">4</span>{img("04_razbor.svg", "Четвёртый этап")}</div><h3>Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации</p></article>
         </div>
         <div class="ob-compat ob-compat-new">
