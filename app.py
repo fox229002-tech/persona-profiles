@@ -339,15 +339,24 @@ except NameError:
 ASSETS = BASE_DIR / "assets"
 
 
+def asset_path(name: str):
+    """Ищет файл в папке assets, а если там нет, то рядом с app.py."""
+    for folder in (ASSETS, BASE_DIR):
+        f = folder / name
+        if f.exists():
+            return f
+    return None
+
+
 def inject_css():
-    css_file = ASSETS / "site.css"
-    if css_file.exists():
+    css_file = asset_path("site.css")
+    if css_file:
         st.markdown(f"<style>{css_file.read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
 
 
 def svg_uri(name: str) -> str:
-    f = ASSETS / name
-    if not f.exists():
+    f = asset_path(name)
+    if not f:
         return ""
     return "data:image/svg+xml;base64," + base64.b64encode(f.read_bytes()).decode()
 
@@ -376,6 +385,7 @@ def render_hero():
 <div class="hero-kicker">Образы</div>
 <h1>Узнайте себя через образы, которые вам близки</h1>
 <p>Необычный способ увидеть свои привычные реакции и понять, как вы взаимодействуете с другими.</p>
+<a href="#try" style="display:inline-block;margin-top:1.2rem;padding:.8rem 1.9rem;border-radius:999px;background:#6E5C8E;color:#fff;font-weight:700;text-decoration:none;">Попробовать</a>
 {img_html}
 </div>""",
         unsafe_allow_html=True,
@@ -407,7 +417,7 @@ def render_hero():
 <div class="plan-price">{PRICE_FULL} {CURRENCY}</div></div>""",
         unsafe_allow_html=True,
     )
-    st.markdown('<div class="section-eyebrow">Попробовать</div>', unsafe_allow_html=True)
+    st.markdown('<div id="try" class="section-eyebrow">Попробовать</div>', unsafe_allow_html=True)
 
 
 def render_faq_and_footer():
