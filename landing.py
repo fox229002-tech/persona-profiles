@@ -215,21 +215,21 @@ def render_landing(price_profile: int, price_full: int):
       <section class="ob-section" id="how">
         <h2>Как это работает?</h2>
         <div class="ob-grid4">
-          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">1</span>{img("01_obraz.svg", "Первый этап")}</div><h3>Назовите близкие образы</h3><p>Напишите имена персонажей, героев или известных людей, которые вам близки.</p></article>
-          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">2</span>{img("02_profili.svg", "Второй этап")}</div><h3>Получите описания профилей</h3><p>Познакомьтесь с несколькими обезличенными описаниями.</p></article>
-          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">3</span>{img("03_vybor.svg", "Третий этап")}</div><h3>Отметьте своё</h3><p>Выберите один или несколько подходящих профилей.</p></article>
-          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">4</span>{img("04_razbor.svg", "Четвёртый этап")}</div><h3>Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации.</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">1</span>{img("01_obraz.svg", "Первый этап")}</div><h3>Назовите близкие образы</h3><p>Напишите имена персонажей, героев или известных людей, которые вам близки</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">2</span>{img("02_profili.svg", "Второй этап")}</div><h3>Получите описания профилей</h3><p>Познакомьтесь с несколькими обезличенными описаниями</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">3</span>{img("03_vybor.svg", "Третий этап")}</div><h3>Отметьте своё</h3><p>Выберите один или несколько подходящих профилей</p></article>
+          <article class="ob-step"><div class="ob-step-top"><span class="ob-step-number">4</span>{img("04_razbor.svg", "Четвёртый этап")}</div><h3>Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации</p></article>
         </div>
         <div class="ob-compat ob-compat-new">
           {img("etapi_sovmestimost.webp", "Декоративные травы и холмы", "ob-compat-art")}
           <div class="ob-compat-body">
-            <p class="ob-compat-intro">Дополнительно можно пройти тестирование на совместимость профилей.</p>
+            <p class="ob-compat-intro">Дополнительно можно пройти тестирование на совместимость профилей</p>
             <h3>Тест на Совместимость</h3>
-            <p class="ob-compat-lead">Узнайте сильные стороны вашего союза, возможные противоречия, сценарии развития отношений и способы достижения взаимопонимания.</p>
+            <p class="ob-compat-lead">Узнайте сильные стороны вашего союза, возможные противоречия, сценарии развития отношений и способы достижения взаимопонимания</p>
             <div class="ob-compat-steps" aria-label="Три этапа теста на совместимость">
-              <div class="ob-compat-step"><span class="ob-compat-number">1</span><p>Предложите пройти тестирование Профиля вашему партнеру.</p></div>
-              <div class="ob-compat-step"><span class="ob-compat-number">2</span><p>Загрузите ваши профили.</p></div>
-              <div class="ob-compat-step"><span class="ob-compat-number">3</span><p>Получите разбор.</p></div>
+              <div class="ob-compat-step"><span class="ob-compat-number">1</span><p>Предложите пройти тестирование Профиля вашему партнеру</p></div>
+              <div class="ob-compat-step"><span class="ob-compat-number">2</span><p>Загрузите ваши профили</p></div>
+              <div class="ob-compat-step"><span class="ob-compat-number">3</span><p>Получите разбор</p></div>
             </div>
           </div>
         </div>
