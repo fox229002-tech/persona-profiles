@@ -669,6 +669,8 @@ html{scroll-behavior:smooth}
 }
 /* Lift tariff prices by 0.5 cm; keep CTA buttons in their grid rows */
 .ob-price-grid > .ob-price > strong{transform:translateY(-0.5cm)!important}
+/* FAQ: increase question-to-answer spacing by 0.5 cm */
+.ob-faq details[open] > p{margin-top:calc(1em + 0.5cm)!important}
 </style>
 """
 
