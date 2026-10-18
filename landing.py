@@ -671,6 +671,11 @@ html{scroll-behavior:smooth}
 .ob-price-grid > .ob-price > strong{transform:translateY(-0.5cm)!important}
 /* FAQ: increase question-to-answer spacing by 0.5 cm */
 .ob-faq details[open] > p{margin-top:calc(1em + 0.5cm)!important}
+/* FAQ disclosure markers: plum chevrons, preserving native details interaction */
+.ob-faq summary{list-style:none!important;display:flex;align-items:baseline;gap:10px}
+.ob-faq summary::-webkit-details-marker{display:none}
+.ob-faq summary::before{content:"";display:inline-block;flex:0 0 8px;width:8px;height:8px;border-right:2px solid #6E5C8E;border-bottom:2px solid #6E5C8E;transform:rotate(-45deg);transition:transform .2s ease}
+.ob-faq details[open] > summary::before{transform:rotate(45deg)}
 </style>
 """
 
