@@ -568,6 +568,12 @@ html{scroll-behavior:smooth}
  .ob-price{padding-top:calc(25px - 0.5cm)!important}
  .ob-price h3{margin-bottom:calc(14px - 1.2cm)!important}
 }
+
+/* Equal tariff layout: one-line titles, shared vertical positions */
+@media(min-width:901px){
+ .ob-price h3{font-size:clamp(24px,2.05vw,30px)!important;white-space:nowrap!important;max-width:85%!important;min-height:0!important;line-height:1.15!important;margin-bottom:14px!important}
+ .ob-price .ob-price-lines{margin-top:0!important;margin-bottom:12px!important}
+}
 </style>
 """
 
@@ -644,7 +650,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Тарифы</h2>
         <div class="ob-price-grid">
           <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><p class="ob-price-lines">Полный разбор личности<br>Сильные стороны и ресурсы<br>Зоны перегрузки<br>Рекомендации</p><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
-          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль +<br>совместимость</h3><p class="ob-price-lines">Ваш полный профиль<br>Анализ совместимости<br>Сильные и уязвимые стороны союза<br>Рекомендации</p><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль + совместимость</h3><p class="ob-price-lines">Ваш полный профиль<br>Анализ совместимости<br>Сильные и уязвимые стороны союза<br>Рекомендации</p><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
         </div>
       </section>
       <div class="ob-two">
