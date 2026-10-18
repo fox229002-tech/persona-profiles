@@ -108,6 +108,16 @@ html{scroll-behavior:smooth}
 .ob-hero .ob-hero-content{padding-top:11%}
 @media(max-width:900px){.ob-hero .ob-nav{gap:7px;padding:14px 3%}.ob-hero .ob-nav a{padding:8px 10px;font-size:12px}.ob-hero .ob-logo{font-size:24px}.ob-hero .ob-hero-content{padding-top:100px}}
 @media(max-width:650px){.ob-hero .ob-nav{position:relative;flex-wrap:wrap;justify-content:center;padding:14px 4%;background:rgba(214,231,222,.88)}.ob-hero .ob-logo{width:100%;text-align:center;margin:0 0 5px}.ob-hero .ob-nav a{font-size:12px}.ob-hero .ob-hero-content{padding-top:40px}.ob-hero{min-height:640px}}
+
+/* Header refinement: shared left edge, left-aligned navigation, milk-green buttons */
+.ob-hero .ob-nav{justify-content:flex-start;gap:12px;padding:18px 4%}
+.ob-hero .ob-logo{font-size:20px!important;margin-right:34px!important;flex:none;width:auto}
+.ob-hero .ob-nav a{font-size:18px!important;padding:11px 17px!important;background:#d9e6d8!important;border-color:#d9e6d8!important;font-weight:600}
+.ob-hero .ob-nav a:hover{background:#c5d9c9!important;border-color:#b6cfbe!important}
+.ob-hero .ob-hero-content{padding-left:4%!important;width:55%}
+.ob-hero .ob-cta{font-size:20px!important;padding:19px 31px!important;gap:21px!important;border-radius:40px!important;margin-top:37px!important;text-decoration:none!important}
+@media(max-width:1100px){.ob-hero .ob-nav{gap:7px}.ob-hero .ob-logo{margin-right:15px!important}.ob-hero .ob-nav a{font-size:15px!important;padding:9px 12px!important}.ob-hero .ob-cta{font-size:17px!important;padding:16px 25px!important}}
+@media(max-width:650px){.ob-hero .ob-nav{justify-content:flex-start;gap:7px;padding:12px 4%}.ob-hero .ob-logo{width:100%;text-align:left;margin:0!important}.ob-hero .ob-nav a{font-size:13px!important;padding:8px 10px!important}.ob-hero .ob-hero-content{padding-left:4%!important;width:100%}.ob-hero .ob-cta{font-size:17px!important;padding:16px 23px!important;margin-top:35px!important}}
 </style>
 """
 
