@@ -118,6 +118,17 @@ html{scroll-behavior:smooth}
 .ob-hero .ob-cta{font-size:20px!important;padding:19px 31px!important;gap:21px!important;border-radius:40px!important;margin-top:37px!important;text-decoration:none!important}
 @media(max-width:1100px){.ob-hero .ob-nav{gap:7px}.ob-hero .ob-logo{margin-right:15px!important}.ob-hero .ob-nav a{font-size:15px!important;padding:9px 12px!important}.ob-hero .ob-cta{font-size:17px!important;padding:16px 25px!important}}
 @media(max-width:650px){.ob-hero .ob-nav{justify-content:flex-start;gap:7px;padding:12px 4%}.ob-hero .ob-logo{width:100%;text-align:left;margin:0!important}.ob-hero .ob-nav a{font-size:13px!important;padding:8px 10px!important}.ob-hero .ob-hero-content{padding-left:4%!important;width:100%}.ob-hero .ob-cta{font-size:17px!important;padding:16px 23px!important;margin-top:35px!important}}
+
+/* Hero final vertical alignment */
+@media(min-width:901px){
+  .ob-hero .ob-nav{top:15px!important}
+  .ob-hero .ob-hero-content{padding-top:calc(11% - 35px)!important}
+  .ob-hero .ob-cta{margin-top:72px!important}
+}
+@media(min-width:651px) and (max-width:900px){
+  .ob-hero .ob-nav{top:12px!important}
+  .ob-hero .ob-hero-content{padding-top:68px!important}
+}
 </style>
 """
 
