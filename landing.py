@@ -132,6 +132,21 @@ html{scroll-behavior:smooth}
 
 /* Lift only heading and description; keep CTA on the cream foreground */
 @media(min-width:901px){.ob-hero .ob-hero-content h1,.ob-hero .ob-hero-content>p{position:relative;top:-20px}}
+
+/* Section 2: one cream palette, botanical backdrop and three compatibility steps */
+#how{background:#F6F4EF}
+#how .ob-compat-new{position:relative;isolation:isolate;overflow:hidden;background:#F6F4EF;border-radius:24px;margin-top:38px;padding:35px 38px 58px;min-height:390px}
+#how .ob-compat-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center bottom;z-index:-1;pointer-events:none}
+#how .ob-compat-body{position:relative;z-index:1;max-width:1050px;margin:0 auto}
+#how .ob-compat-intro{font-size:16px;line-height:1.5;margin:0 0 12px;color:#484450}
+#how .ob-compat-new h3{font:600 clamp(30px,3.2vw,44px)/1.15 Georgia,serif!important;margin:0 0 16px;color:#2B2A33}
+#how .ob-compat-lead{max-width:900px;font-size:18px;line-height:1.5;color:#484450;margin:0 0 38px}
+#how .ob-compat-steps{display:grid;grid-template-columns:1.25fr 1fr 0.9fr;gap:30px;align-items:start}
+#how .ob-compat-step{display:flex;align-items:flex-start;gap:16px;min-width:0}
+#how .ob-compat-number{display:inline-flex;flex:0 0 48px;width:48px;height:48px;border-radius:50%;align-items:center;justify-content:center;background:#6E9989;color:white;font:600 23px Georgia,serif}
+#how .ob-compat-step p{margin:7px 0 0;font:600 19px/1.35 Georgia,serif;color:#2B2A33}
+@media(max-width:900px){#how .ob-compat-new{padding:28px 25px 50px}#how .ob-compat-steps{gap:16px}#how .ob-compat-step{gap:10px}#how .ob-compat-number{flex-basis:40px;width:40px;height:40px;font-size:20px}#how .ob-compat-step p{font-size:16px}}
+@media(max-width:650px){#how .ob-compat-new{margin-top:28px;padding:24px 16px 75px;min-height:0}#how .ob-compat-art{object-fit:cover;opacity:.55}#how .ob-compat-lead{font-size:16px;margin-bottom:25px}#how .ob-compat-steps{grid-template-columns:1fr;gap:17px}#how .ob-compat-step p{font-size:17px}}
 </style>
 """
 
@@ -164,12 +179,17 @@ def render_landing(price_profile: int, price_full: int):
           <article class="ob-step">{img("03_vybor.svg", "Третий этап")}<h3>3. Отметьте своё</h3><p>Выберите один или несколько подходящих профилей.</p></article>
           <article class="ob-step">{img("04_razbor.svg", "Четвёртый этап")}<h3>4. Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации.</p></article>
         </div>
-        <div class="ob-compat">
-          <p>Дополнительно можно пройти тестирование на совместимость профилей.</p>
-          <h3>Совместимость — 2 этапа</h3>
-          <div class="ob-compat-grid">
-            <div><b>1. Загрузите описания профилей</b><p>Предоставьте два профиля для анализа.</p></div>
-            <div><b>2. Получите разбор</b><p>Узнайте сильные стороны вашего союза, возможные противоречия, сценарии развития отношений и способы достижения взаимопонимания.</p></div>
+        <div class="ob-compat ob-compat-new">
+          {img("etapi_sovmestimost.webp", "Декоративные травы и холмы", "ob-compat-art")}
+          <div class="ob-compat-body">
+            <p class="ob-compat-intro">Дополнительно можно пройти тестирование на совместимость профилей.</p>
+            <h3>Тест на Совместимость</h3>
+            <p class="ob-compat-lead">Узнайте сильные стороны вашего союза, возможные противоречия, сценарии развития отношений и способы достижения взаимопонимания.</p>
+            <div class="ob-compat-steps" aria-label="Три этапа теста на совместимость">
+              <div class="ob-compat-step"><span class="ob-compat-number">1</span><p>Предложите пройти тестирование Профиля вашему партнеру.</p></div>
+              <div class="ob-compat-step"><span class="ob-compat-number">2</span><p>Загрузите ваши профили.</p></div>
+              <div class="ob-compat-step"><span class="ob-compat-number">3</span><p>Получите разбор.</p></div>
+            </div>
           </div>
         </div>
       </section>
