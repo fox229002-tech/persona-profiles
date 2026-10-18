@@ -540,6 +540,13 @@ html{scroll-behavior:smooth}
  .ob-price h3{font-size:29px!important;max-width:75%!important}
  .ob-price .ob-price-lines{font-size:14px!important;max-width:65%!important}
 }
+
+/* Tariffs: group heading, description, price and button vertically */
+.ob-price{justify-content:flex-start!important}
+.ob-price h3{margin-bottom:18px!important}
+.ob-price .ob-price-lines{margin-bottom:14px!important}
+.ob-price strong{margin-top:0!important}
+.ob-price a{margin-top:10px!important}
 </style>
 """
 
