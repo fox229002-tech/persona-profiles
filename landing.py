@@ -528,6 +528,18 @@ html{scroll-behavior:smooth}
  .ob-price h3{font-size:clamp(24px,5vw,30px)!important;max-width:75%!important}
  .ob-price .ob-price-list{font-size:14px!important;max-width:63%!important;width:63%!important}
 }
+
+/* Final compact tariff layout: no bullets and no stretched vertical gaps */
+.ob-price{height:auto!important;min-height:0!important;aspect-ratio:1.7/1;padding:25px 32px!important;justify-content:flex-start}
+.ob-price h3{font-size:clamp(27px,2.5vw,35px)!important;min-height:0!important;margin:0 0 20px!important;max-width:68%!important}
+.ob-price .ob-price-lines{position:relative;z-index:1;font-size:16px!important;line-height:1.5!important;max-width:59%!important;margin:0 0 12px!important}
+.ob-price strong{margin-top:auto!important;font-size:32px!important}
+.ob-price a{margin-top:9px!important;padding:11px 28px!important}
+@media(max-width:700px){
+ .ob-price{aspect-ratio:auto;min-height:330px!important;padding:24px!important}
+ .ob-price h3{font-size:29px!important;max-width:75%!important}
+ .ob-price .ob-price-lines{font-size:14px!important;max-width:65%!important}
+}
 </style>
 """
 
@@ -603,8 +615,8 @@ def render_landing(price_profile: int, price_full: int):
       <section class="ob-section" id="prices">
         <h2>Тарифы</h2>
         <div class="ob-price-grid">
-          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><ul class="ob-price-list"><li>Полный разбор личности</li><li>Сильные стороны и ресурсы</li><li>Зоны перегрузки</li><li>Рекомендации</li></ul><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
-          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль +<br>совместимость</h3><ul class="ob-price-list"><li>Ваш полный профиль</li><li>Анализ совместимости</li><li>Сильные и уязвимые стороны союза</li><li>Рекомендации</li></ul><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><p class="ob-price-lines">Полный разбор личности<br>Сильные стороны и ресурсы<br>Зоны перегрузки<br>Рекомендации</p><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль +<br>совместимость</h3><p class="ob-price-lines">Ваш полный профиль<br>Анализ совместимости<br>Сильные и уязвимые стороны союза<br>Рекомендации</p><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
         </div>
       </section>
       <div class="ob-two">
