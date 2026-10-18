@@ -327,56 +327,8 @@ if page == "Исследование":
         st.rerun()
 
 if page == "Главная":
-    # Композиция лендинга — HTML/CSS; исследование остаётся на Streamlit.
-    header_path = ASSETS / "header.png"
-    if header_path.exists():
-        header_data = base64.b64encode(header_path.read_bytes()).decode("ascii")
-        st.markdown(f"""
-        <div class="exact-header">
-          <img src="data:image/png;base64,{header_data}" alt="Образы — исследование себя">
-          <nav class="header-hotspots" aria-label="Навигация">
-            <a class="hotspot nav-how" href="#how" aria-label="Как это работает"></a>
-            <a class="hotspot nav-example" href="#example" aria-label="Пример"></a>
-            <a class="hotspot nav-prices" href="#prices" aria-label="Тарифы"></a>
-            <a class="hotspot nav-faq" href="#faq" aria-label="Вопросы"></a>
-            <a class="hotspot nav-try" href="?view=research" aria-label="Попробовать"></a>
-            <a class="hotspot hero-try" href="?view=research" aria-label="Начать исследование"></a>
-          </nav>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.info("Добавьте исходное изображение в GitHub: assets/header.png — тогда здесь появится утверждённая шапка.")
-        st.markdown('<div class="hero"><h1>Узнайте себя через образы, которые вам близки</h1></div>', unsafe_allow_html=True)
-    st.markdown('<div id="how" class="landing-section-head"><span>ПРОСТО И ИНТЕРЕСНО</span><h2>Как это работает</h2><p>Три шага, чтобы увидеть себя с неожиданной стороны.</p></div>', unsafe_allow_html=True)
-    st.markdown("""
-    <div class="landing-steps">
-      <article><span>01</span><h3>Назовите героев</h3><p>Введите от одного до трёх персонажей, с которыми вы себя ассоциируете.</p></article>
-      <article><span>02</span><h3>Узнайте себя</h3><p>Прочитайте анонимные карточки и отметьте те, что вам близки.</p></article>
-      <article><span>03</span><h3>Получите профиль</h3><p>ИИ подготовит разбор выбранных образов и рекомендации.</p></article>
-    </div>
-    <div id="example" class="landing-section-head"><span>РЕЗУЛЬТАТ</span><h2>Что вы узнаете</h2></div>
-    <div class="landing-teaser"><div class="landing-teaser-art"><span>✦</span></div><div><h3>Ваш индивидуальный разбор</h3><p>Особенности образа жизни, привычные реакции, возможные перегрузки, способы адаптации и книги для размышления.</p><p class="landing-disclaimer">Это метафорическое исследование, а не психологическая или медицинская диагностика.</p></div></div>
-    <div id="prices" class="landing-section-head"><span>ВАРИАНТЫ ИССЛЕДОВАНИЯ</span><h2>Выберите свой путь</h2></div>
-    """, unsafe_allow_html=True)
-    st.markdown(f"""
-    <div class="landing-prices">
-      <article><span>ДЛЯ СЕБЯ</span><h3>Мой профиль</h3><p>Исследование ваших образов, рекомендации и сохранение результата.</p><strong>{PRICE_PROFILE} ₽</strong><small>Тестовая цена</small></article>
-      <article class="featured"><span>ДЛЯ ДВОИХ</span><h3>Профиль + совместимость</h3><p>Ваш профиль и разбор сочетания двух людей в выбранном типе отношений.</p><strong>{PRICE_FULL} ₽</strong><small>Тестовая цена</small></article>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("Попробовать бесплатно в деморежиме  →", key="start_bottom"):
-        st.session_state.site_page = "Исследование"
-        st.rerun()
-    st.markdown('<div id="faq" class="landing-section-head"><span>ВОПРОСЫ И ОТВЕТЫ</span><h2>Перед началом</h2></div>', unsafe_allow_html=True)
-    with st.expander("Это психологический тест или терапия?"):
-        st.write("Нет. Это информационно-развлекательный формат саморефлексии, а не диагностика или медицинская консультация.")
-    with st.expander("Будут ли известны персонажи по карточкам?"):
-        st.write("Имена персонажей в карточках не показываются, а сами карточки перемешиваются.")
-    with st.expander("Можно ли сохранить результат?"):
-        st.write("Да, профиль и анализ совместимости доступны для скачивания в формате .txt.")
-    with st.expander("Списываются ли деньги при тестировании?"):
-        st.write("Нет. В этой версии оплата демонстрационная, без реального списания.")
-    st.markdown('<footer class="landing-footer"><b>ОБРАЗЫ</b><span>Метафорическое исследование себя · 18+ · Демонстрационная версия</span></footer>', unsafe_allow_html=True)
+    from landing import render_landing
+    render_landing(PRICE_PROFILE, PRICE_FULL)
     st.stop()
 
 pwd = st.secrets.get("APP_PASSWORD")
@@ -391,7 +343,7 @@ if pwd:
                 st.session_state.authenticated = True
                 st.rerun()
             else:
-                st.error("Пароль не совпадает с APP_PASSWORD в Secrets этого тестового приложения.")
+                st.error("Неверный пароль")
         st.stop()
 
 st.title("Исследование себя через образы")
