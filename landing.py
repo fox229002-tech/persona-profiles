@@ -58,6 +58,45 @@ html{scroll-behavior:smooth}
 .ob-missing{padding:20px;border:1px dashed #B9A9D6;border-radius:10px}
 @media(max-width:900px){.ob-grid4{grid-template-columns:repeat(2,1fr)}.ob-hero-content{width:68%}.ob-two{grid-template-columns:1fr}}
 @media(max-width:650px){.ob-nav{gap:12px}.ob-logo{width:100%}.ob-nav a{font-size:13px}.ob-hero{min-height:620px}.ob-hero-image{object-position:65% center;opacity:.45}.ob-hero-content{width:100%;padding:45px 7%}.ob-hero p{font-size:16px}.ob-grid4,.ob-price-grid,.ob-compat-grid,.ob-example{grid-template-columns:1fr}.ob-section{padding:45px 3% 8px}.ob-example{gap:12px}}
+
+/* Reference composition */
+.block-container{max-width:1450px!important;padding-left:2rem!important;padding-right:2rem!important}
+.ob-page{max-width:1360px;margin:auto}
+.ob-hero{border-radius:0;min-height:0;aspect-ratio:2.15/1}
+.ob-hero-content{padding:6% 0 4% 7%;width:53%}
+.ob-hero h1{font-size:clamp(33px,4vw,59px)!important;line-height:1.1!important}
+.ob-section{padding:46px 3% 12px}
+.ob-section h2{font-weight:600!important}
+.ob-grid4{gap:25px}
+.ob-step{background:transparent;border-radius:0;padding:0 6px}
+.ob-step img{width:75px;height:75px}
+.ob-step h3{font-size:20px!important;font-weight:600!important}
+.ob-compat{margin-top:25px}
+.ob-example{grid-template-columns:32% 1fr 28%;background:linear-gradient(115deg,#DCEBE2,#F0EAF1);gap:20px;padding:22px}
+.ob-example img{max-height:260px;border-radius:15px}
+.ob-example h3{font:600 24px Georgia,serif!important}
+.ob-example aside{background:#e6f0e9;border-radius:17px;padding:18px}
+.ob-example aside ul{padding-left:20px;line-height:1.7}
+.ob-example-compat{background:linear-gradient(115deg,#E5EDE7,#E9E1F2)}
+.ob-price{position:relative;overflow:hidden;min-height:290px;padding:28px 34px;display:flex;flex-direction:column;align-items:flex-start;background:#dcebe2}
+.ob-price:nth-child(2){background:#e8dff1}
+.ob-price img{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:cover;z-index:0}
+.ob-price h3,.ob-price p,.ob-price strong,.ob-price a{position:relative;z-index:1;max-width:67%}
+.ob-price h3{margin:0 0 12px;font-size:25px!important}
+.ob-price p{margin:0}
+.ob-price strong{margin-top:auto}
+.ob-price a{display:inline-block;margin-top:12px;padding:8px 24px;background:#789a8a;color:white!important;text-decoration:none;border-radius:22px}
+.ob-price:nth-child(2) a{background:#6E5C8E}
+.ob-two{gap:45px;align-items:start}
+.ob-two .ob-section{padding-top:48px}
+.ob-about{min-height:0}
+.ob-about img{width:140px}
+.ob-faq details,.ob-example details{border-bottom:1px solid #d8d1da;padding:12px 0}
+.ob-faq summary,.ob-example summary{cursor:pointer;font-weight:600}
+.ob-faq details p,.ob-example details p{font-size:15px;line-height:1.6}
+.ob-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;background:#eee9e5;padding:25px 3%;border:0}
+@media(max-width:900px){.ob-hero{aspect-ratio:auto;min-height:470px}.ob-example{grid-template-columns:35% 1fr}.ob-example aside{grid-column:1/-1}}
+@media(max-width:650px){.block-container{padding-left:1rem!important;padding-right:1rem!important}.ob-hero{min-height:590px}.ob-hero-content{width:100%;padding:45px 7%}.ob-hero-image{opacity:.5}.ob-grid4{grid-template-columns:repeat(2,1fr)}.ob-example{grid-template-columns:1fr}.ob-example aside{grid-column:auto}.ob-two{grid-template-columns:1fr}.ob-price h3,.ob-price p,.ob-price strong,.ob-price a{max-width:75%}}
 </style>
 """
 
@@ -103,7 +142,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Профиль»</h2>
         <div class="ob-example">
           {img("primer_profile.webp", "Иллюстрация профиля")}
-          <div><p>В примере разбора представлены особенности образа жизни, привычные реакции, возможные перегрузки и рекомендации.</p></div>
+          <div><h3>Профиль личности</h3><p>Особенности образа жизни, привычные реакции, точки перегрузки и способы адаптации.</p></div><aside><b>Что вы узнаете</b><ul><li>Сильные стороны</li><li>Привычные реакции</li><li>Зоны перегрузки</li><li>Рекомендации</li></ul></aside>
         </div>
       </section>
     </div>
@@ -116,7 +155,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Совместимость»</h2>
         <div class="ob-example">
           {img("primer_sovmestimost.webp", "Иллюстрация совместимости")}
-          <div><p>Пример показывает, как анализируются сильные стороны союза, возможные противоречия и пути взаимопонимания.</p></div>
+          <div><h3>Два профиля — один союз</h3><p>Сильные стороны отношений, возможные противоречия и способы взаимопонимания.</p></div><aside><b>В разборе</b><ul><li>Точки соприкосновения</li><li>Возможные конфликты</li><li>Сценарии развития</li><li>Практические советы</li></ul></aside>
         </div>
       </section>
     </div>
@@ -128,8 +167,8 @@ def render_landing(price_profile: int, price_full: int):
       <section class="ob-section" id="prices">
         <h2>Тарифы</h2>
         <div class="ob-price-grid">
-          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><p>Разбор выбранных образов: привычки, реакции, перегрузки, рекомендации и книги.</p><strong>{price_profile} ₽</strong></article>
-          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль + совместимость</h3><p>Полный профиль и анализ взаимодействия двух людей.</p><strong>{price_full} ₽</strong></article>
+          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><p>Полный разбор личности<br>Сильные стороны и ресурсы<br>Зоны перегрузки<br>Рекомендации</p><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль + совместимость</h3><p>Ваш полный профиль<br>Анализ совместимости<br>Сильные и уязвимые стороны союза<br>Рекомендации</p><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
         </div>
       </section>
       <div class="ob-two">
@@ -139,19 +178,15 @@ def render_landing(price_profile: int, price_full: int):
           <p>Иногда легче узнать собственные черты в знакомом персонаже, чем описать себя напрямую. Образы становятся отправной точкой для размышлений о привычках, реакциях и отношениях.</p>
           <p>Это метафорическое исследование для саморефлексии, а не психологическая или медицинская диагностика.</p>
         </section>
-        <section class="ob-section" id="faq"><h2>Частые вопросы</h2></section>
+        <section class="ob-section ob-faq" id="faq"><h2>Частые вопросы</h2>
+<details><summary>Это психологический тест или терапия?</summary><p>Нет. Это метафорическое исследование для саморефлексии, а не диагностика или медицинская консультация.</p></details>
+<details><summary>Будут ли известны персонажи по карточкам?</summary><p>Имена персонажей в карточках не показываются, а сами карточки перемешиваются.</p></details>
+<details><summary>Можно ли сохранить результат?</summary><p>Да, результаты можно скачать в формате TXT.</p></details>
+<details><summary>Списываются ли деньги при тестировании?</summary><p>Нет. В текущей тестовой версии оплата демонстрационная.</p></details></section>
       </div>
     </div>
     """, unsafe_allow_html=True)
-    with st.expander("Это психологический тест или терапия?"):
-        st.write("Нет. Это метафорическое исследование для саморефлексии, а не диагностика или медицинская консультация.")
-    with st.expander("Будут ли известны персонажи по карточкам?"):
-        st.write("Имена персонажей в карточках не показываются, а сами карточки перемешиваются.")
-    with st.expander("Можно ли сохранить результат?"):
-        st.write("Да, результаты можно скачать в формате TXT.")
-    with st.expander("Списываются ли деньги при тестировании?"):
-        st.write("Нет. В текущей тестовой версии оплата демонстрационная.")
-    st.markdown('<div class="ob-page"><footer class="ob-footer"><strong>Образы</strong> · 18+<p>ИП Фофанова — реквизиты и контакты будут добавлены после предоставления точных данных.</p></footer></div>', unsafe_allow_html=True)
+    st.markdown('<div class="ob-page"><footer class="ob-footer"><strong>Образы</strong><span>Оферта · Политика конфиденциальности · Контакты</span><span>ИП Фофанова · реквизиты уточняются</span><span>18+</span></footer></div>', unsafe_allow_html=True)
     docs = [("Оферта","oferta.pdf"),("Политика конфиденциальности","privacy.pdf")]
     available = [(label, ASSETS / filename) for label,filename in docs if (ASSETS / filename).exists()]
     if available:
