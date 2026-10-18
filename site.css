@@ -1,0 +1,55 @@
+/* Оформление «Образы»: мятно-лавандовая палитра для Streamlit-прототипа. */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root { --cream:#F6F4EF; --mint:#D6E7DE; --sage:#8FA89A; --lavender:#B9A9D6; --plum:#6E5C8E; --ink:#2B2A33; }
+
+.stApp { background:var(--cream); color:var(--ink); font-family:'Manrope', 'Segoe UI', sans-serif; }
+input, textarea, button, label, .stMarkdown { font-family:'Manrope', 'Segoe UI', sans-serif !important; }
+h1, h2, h3, h4 { font-family:'Cormorant Garamond', Georgia, serif !important; color:var(--ink); letter-spacing:-.01em; font-weight:600; }
+.block-container { max-width:1120px; padding-top:2rem; padding-bottom:4rem; }
+h2 { font-size:clamp(1.7rem,3vw,2.4rem) !important; }
+p { line-height:1.65; }
+footer { visibility:hidden; }
+
+/* кнопки, вкладки, поля */
+div.stButton > button { border-radius:999px; border-color:var(--sage); padding:.55rem 1.4rem; }
+div.stButton > button:hover { border-color:var(--plum); color:var(--plum); }
+div.stButton > button[kind="primary"] { background:var(--plum); color:#fff; border:0; }
+div[data-testid="stVerticalBlockBorderWrapper"] { border-radius:22px; }
+div[data-testid="stExpander"] { border-radius:16px; border-color:#e0dbe6; background:#fff8; }
+div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] { color:var(--plum); border-bottom-color:var(--plum); }
+input, textarea { border-radius:12px !important; }
+
+/* первый экран */
+.hero { background:var(--mint); padding:2.4rem 2.4rem 1.6rem; border-radius:28px; margin-bottom:1.6rem; }
+.hero-kicker { text-transform:uppercase; letter-spacing:.16em; font-size:.75rem; color:var(--plum); font-weight:700; }
+.hero h1 { font-size:clamp(2.3rem,5vw,3.8rem) !important; line-height:1.1 !important; max-width:760px; margin:.5rem 0 1rem; padding:0; }
+.hero p { max-width:620px; font-size:1.1rem; margin-bottom:0; }
+.hero-img { display:block; width:100%; border-radius:20px; margin-top:1.6rem; }
+.small-print { font-size:.8rem; opacity:.75; }
+
+/* как это работает */
+.section-eyebrow { font-size:.8rem; letter-spacing:.1em; color:var(--plum); text-transform:uppercase; font-weight:700; margin:1.6rem 0 .2rem; }
+.step { padding:.4rem 0 1rem; }
+.step-num { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; background:var(--sage); color:#fff; font-weight:700; font-size:.85rem; }
+.step h4 { margin:.7rem 0 .3rem; font-size:1.3rem; }
+.step p { font-size:.95rem; opacity:.8; margin:0; }
+
+/* тарифы */
+.plan-card { background:#fff; border-radius:24px; padding:1.6rem; border:1px solid #e6e1e9; height:100%; }
+.plan-card.featured { background:#e9e2f3; border-color:var(--lavender); }
+.plan-card h3 { margin:0 0 .4rem; font-size:1.6rem; }
+.plan-card ul { padding-left:1.1rem; margin:.6rem 0 1rem; font-size:.95rem; }
+.plan-price { font-family:'Cormorant Garamond', Georgia, serif; font-size:2.1rem; font-weight:700; color:var(--plum); }
+
+/* подвал */
+.site-footer { margin-top:3rem; padding-top:1.4rem; border-top:1px solid #dcd6e2; display:flex; gap:1.6rem; flex-wrap:wrap; align-items:center; font-size:.85rem; }
+.site-footer a { color:var(--plum); text-decoration:none; }
+.site-footer .brand { font-family:'Cormorant Garamond', Georgia, serif; font-size:1.6rem; font-weight:700; }
+.badge-18 { border:1.5px solid var(--plum); border-radius:50%; width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; color:var(--plum); }
+
+/* информационные блоки и вкладки в палитре сайта */
+div[data-testid="stAlert"] { background:#e9e2f3; border:0; border-radius:16px; }
+div[data-testid="stAlert"] * { color:var(--ink) !important; }
+div[data-baseweb="tab-highlight"] { background-color:var(--plum) !important; }
+div[data-testid="stTabs"] button[role="tab"] p { font-weight:600; }
