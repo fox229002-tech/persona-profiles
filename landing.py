@@ -348,6 +348,57 @@ html{scroll-behavior:smooth}
  .ob-example aside{grid-column:auto;margin-right:0}
  .ob-example .ob-example-botanical{width:75%!important;right:0!important;bottom:0!important;opacity:.35}
 }
+
+/* Result previews: stronger hierarchy, checked benefits and in-card disclosure. */
+.ob-example .ob-example-copy h3{
+ font-size:clamp(28px,2.25vw,36px)!important;
+ line-height:1.16!important;
+ margin:0 0 16px!important;
+}
+.ob-example .ob-example-copy p{font-size:clamp(17px,1.2vw,20px)!important;line-height:1.5!important}
+.ob-example aside b{font-size:clamp(18px,1.3vw,21px)!important}
+.ob-example aside ul{list-style:none!important;padding:0!important;margin:14px 0 0!important}
+.ob-example aside li{
+ position:relative;
+ padding-left:35px;
+ margin:12px 0;
+ font-size:clamp(15px,1.1vw,18px);
+ line-height:1.4;
+}
+.ob-example aside li::before{
+ content:"✓";
+ position:absolute;left:0;top:0;
+ width:24px;height:24px;
+ display:grid;place-items:center;
+ border-radius:50%;
+ background:#729E8D;color:white;
+ font:700 16px Arial,sans-serif;
+}
+.ob-example .ob-example-details{border:0!important;padding:0!important;margin-top:22px;position:relative;z-index:3}
+.ob-example .ob-example-details summary{
+ display:inline-flex;align-items:center;justify-content:center;
+ background:#6E5C8E;color:white!important;
+ border-radius:999px;
+ padding:15px 24px;
+ font:600 16px Arial,sans-serif!important;
+ list-style:none;cursor:pointer;
+ transition:background .15s ease;
+}
+.ob-example .ob-example-details summary::-webkit-details-marker{display:none}
+.ob-example .ob-example-details summary::after{content:" →";margin-left:12px}
+.ob-example .ob-example-details[open] summary::after{content:" ↑"}
+.ob-example .ob-example-details summary:hover{background:#594877}
+.ob-example .ob-example-details .ob-example-placeholder{
+ margin-top:16px;
+ padding:15px 18px;
+ border-radius:12px;
+ background:rgba(246,244,239,.93);
+ font-size:15px;line-height:1.5;
+}
+@media(max-width:650px){
+ .ob-example .ob-example-copy h3{font-size:28px!important}
+ .ob-example .ob-example-details summary{width:100%;padding:15px}
+}
 </style>
 """
 
@@ -398,30 +449,26 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Профиль»</h2>
         <div class="ob-example">
           {img("primer_profile.webp", "Иллюстрация профиля")}
-          <div class="ob-example-copy"><h3>Профиль личности</h3><p>Исследуйте особенности своего характера через близкие вам образы. Узнайте, какие качества помогают вам справляться с задачами, как проявляются привычные реакции и что может становиться источником перегрузки.</p></div>
+          <div class="ob-example-copy"><h3>Профиль личности</h3><p>Исследуйте особенности своего характера через близкие вам образы. Узнайте, какие качества помогают вам справляться с задачами, как проявляются привычные реакции и что может становиться источником перегрузки.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера профиля пока не предоставлен. Добавим утверждённый пример без вымышленных результатов.</div></details></div>
           <aside><b>Что вы узнаете</b><ul><li>Сильные стороны и ресурсы</li><li>Привычные реакции</li><li>Зоны перегрузки</li><li>Рекомендации для повседневной жизни</li></ul></aside>
           {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
       </section>
     </div>
     """, unsafe_allow_html=True)
-    with st.expander("Посмотреть полный пример — Профиль"):
-        st.info("Полный текст примера профиля пока не предоставлен. Добавим утверждённый пример без вымышленных результатов.")
     st.markdown(f"""
     <div class="ob-page">
       <section class="ob-section" id="compat-example">
         <h2>Пример результата «Совместимость»</h2>
         <div class="ob-example ob-example-compat">
           {img("primer_sovmestimost.webp", "Иллюстрация совместимости")}
-          <div class="ob-example-copy"><h3>Два профиля — один союз</h3><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p></div>
+          <div class="ob-example-copy"><h3>Два профиля — один союз</h3><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера совместимости пока не предоставлен. Добавим утверждённый пример.</div></details></div>
           <aside><b>В разборе</b><ul><li>Точки соприкосновения</li><li>Возможные противоречия</li><li>Сценарии взаимодействия</li><li>Практические рекомендации</li></ul></aside>
           {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
       </section>
     </div>
     """, unsafe_allow_html=True)
-    with st.expander("Посмотреть полный пример — Совместимость"):
-        st.info("Полный текст примера совместимости пока не предоставлен. Добавим утверждённый пример.")
     st.markdown(f"""
     <div class="ob-page">
       <section class="ob-section" id="prices">
