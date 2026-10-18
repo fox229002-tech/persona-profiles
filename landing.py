@@ -147,6 +147,25 @@ html{scroll-behavior:smooth}
 #how .ob-compat-step p{margin:7px 0 0;font:600 19px/1.35 Georgia,serif;color:#2B2A33}
 @media(max-width:900px){#how .ob-compat-new{padding:28px 25px 50px}#how .ob-compat-steps{gap:16px}#how .ob-compat-step{gap:10px}#how .ob-compat-number{flex-basis:40px;width:40px;height:40px;font-size:20px}#how .ob-compat-step p{font-size:16px}}
 @media(max-width:650px){#how .ob-compat-new{margin-top:28px;padding:24px 16px 75px;min-height:0}#how .ob-compat-art{object-fit:cover;opacity:.55}#how .ob-compat-lead{font-size:16px;margin-bottom:25px}#how .ob-compat-steps{grid-template-columns:1fr;gap:17px}#how .ob-compat-step p{font-size:17px}}
+
+/* Approved section-two layout: numbered icon row and raised, centered compatibility content */
+#how .ob-step{position:relative}
+#how .ob-step-number{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:#6e9989;color:#fff;font:600 23px Georgia,serif;vertical-align:middle;margin-right:9px}
+#how .ob-step img{display:block;margin-left:63px;margin-bottom:14px}
+#how .ob-step h3{display:flex;align-items:flex-start;gap:12px;line-height:1.2!important}
+#how .ob-step-number{flex:0 0 46px;margin:-5px 0 0}
+#how .ob-step p{margin-left:58px}
+#how .ob-compat-new{padding:30px 32px 145px!important;min-height:405px!important;margin-top:35px!important}
+#how .ob-compat-new .ob-compat-art{z-index:0!important;object-position:center bottom}
+#how .ob-compat-new .ob-compat-body{max-width:900px!important;margin:0 auto!important;text-align:left;z-index:1!important}
+#how .ob-compat-new .ob-compat-intro{margin-bottom:8px!important}
+#how .ob-compat-new h3{margin-bottom:10px!important}
+#how .ob-compat-new .ob-compat-lead{max-width:880px;margin-bottom:28px!important}
+#how .ob-compat-new .ob-compat-steps{grid-template-columns:1.35fr 1fr .8fr;gap:24px}
+#how .ob-compat-new .ob-compat-step{align-items:flex-start;gap:14px}
+#how .ob-compat-new .ob-compat-step p{margin:5px 0 0!important}
+@media(max-width:900px){#how .ob-step img{margin-left:0}#how .ob-step p{margin-left:0}#how .ob-compat-new{padding-bottom:110px!important}}
+@media(max-width:650px){#how .ob-step h3{gap:8px}#how .ob-step-number{flex-basis:34px;width:34px;height:34px;font-size:18px}#how .ob-compat-new{padding:24px 20px 95px!important}#how .ob-compat-new .ob-compat-steps{grid-template-columns:1fr;gap:14px}#how .ob-compat-new .ob-compat-art{opacity:.35}}
 </style>
 """
 
@@ -174,10 +193,10 @@ def render_landing(price_profile: int, price_full: int):
       <section class="ob-section" id="how">
         <h2>Как это работает?</h2>
         <div class="ob-grid4">
-          <article class="ob-step">{img("01_obraz.svg", "Первый этап")}<h3>1. Назовите близкие образы</h3><p>Напишите имена персонажей, героев или известных людей, которые вам близки.</p></article>
-          <article class="ob-step">{img("02_profili.svg", "Второй этап")}<h3>2. Получите описания профилей</h3><p>Познакомьтесь с несколькими обезличенными описаниями.</p></article>
-          <article class="ob-step">{img("03_vybor.svg", "Третий этап")}<h3>3. Отметьте своё</h3><p>Выберите один или несколько подходящих профилей.</p></article>
-          <article class="ob-step">{img("04_razbor.svg", "Четвёртый этап")}<h3>4. Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации.</p></article>
+          <article class="ob-step">{img("01_obraz.svg", "Первый этап")}<h3><span class="ob-step-number">1</span> Назовите близкие образы</h3><p>Напишите имена персонажей, героев или известных людей, которые вам близки.</p></article>
+          <article class="ob-step">{img("02_profili.svg", "Второй этап")}<h3><span class="ob-step-number">2</span> Получите описания профилей</h3><p>Познакомьтесь с несколькими обезличенными описаниями.</p></article>
+          <article class="ob-step">{img("03_vybor.svg", "Третий этап")}<h3><span class="ob-step-number">3</span> Отметьте своё</h3><p>Выберите один или несколько подходящих профилей.</p></article>
+          <article class="ob-step">{img("04_razbor.svg", "Четвёртый этап")}<h3><span class="ob-step-number">4</span> Получите разбор</h3><p>Узнайте свои сильные и слабые стороны, зоны перегрузки и рекомендации.</p></article>
         </div>
         <div class="ob-compat ob-compat-new">
           {img("etapi_sovmestimost.webp", "Декоративные травы и холмы", "ob-compat-art")}
