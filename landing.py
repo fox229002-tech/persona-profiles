@@ -514,6 +514,20 @@ html{scroll-behavior:smooth}
  .ob-price h3{max-width:75%!important;min-height:2.3em!important}
  .ob-price .ob-price-sub{max-width:70%}
 }
+
+/* Compact tariff cards: keep artwork and prices at the original height */
+.ob-price{min-height:290px!important;padding:28px 34px!important}
+.ob-price h3{font-size:clamp(26px,2.3vw,34px)!important;line-height:1.15!important;min-height:2.3em!important;max-width:70%!important;margin:0 0 10px!important;overflow-wrap:normal!important;word-break:normal!important;hyphens:none!important}
+.ob-price .ob-price-list{font-size:15px!important;line-height:1.3!important;max-width:54%!important;width:54%!important;margin:0 0 8px!important}
+.ob-price .ob-price-list li{gap:8px!important;margin:0 0 6px!important}
+.ob-price .ob-price-list li:before{width:18px!important;height:18px!important;font-size:13px!important}
+.ob-price strong{font-size:32px!important}
+.ob-price a{padding:11px 28px!important;font-size:18px!important;margin-top:9px!important}
+@media(max-width:700px){
+ .ob-price{min-height:290px!important;padding:24px!important}
+ .ob-price h3{font-size:clamp(24px,5vw,30px)!important;max-width:75%!important}
+ .ob-price .ob-price-list{font-size:14px!important;max-width:63%!important;width:63%!important}
+}
 </style>
 """
 
@@ -589,8 +603,8 @@ def render_landing(price_profile: int, price_full: int):
       <section class="ob-section" id="prices">
         <h2>Тарифы</h2>
         <div class="ob-price-grid">
-          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><div class="ob-price-sub">для себя</div><ul class="ob-price-list"><li>Полный разбор личности</li><li>Сильные стороны и ресурсы</li><li>Зоны перегрузки</li><li>Рекомендации</li></ul><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
-          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль и<br>совместимость</h3><div class="ob-price-sub">для двоих</div><ul class="ob-price-list"><li>Ваш полный профиль</li><li>Анализ совместимости</li><li>Сильные и уязвимые стороны союза</li><li>Рекомендации</li></ul><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><ul class="ob-price-list"><li>Полный разбор личности</li><li>Сильные стороны и ресурсы</li><li>Зоны перегрузки</li><li>Рекомендации</li></ul><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль +<br>совместимость</h3><ul class="ob-price-list"><li>Ваш полный профиль</li><li>Анализ совместимости</li><li>Сильные и уязвимые стороны союза</li><li>Рекомендации</li></ul><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
         </div>
       </section>
       <div class="ob-two">
