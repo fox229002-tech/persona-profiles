@@ -667,6 +667,8 @@ html{scroll-behavior:smooth}
  .ob-price-grid > .ob-price > .ob-price-lines{max-width:66%!important;font-size:14px!important}
  .ob-price-grid > .ob-price > a{font-size:17px!important}
 }
+/* Lift tariff prices by 0.5 cm; keep CTA buttons in their grid rows */
+.ob-price-grid > .ob-price > strong{transform:translateY(-0.5cm)!important}
 </style>
 """
 
