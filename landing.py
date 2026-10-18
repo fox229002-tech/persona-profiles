@@ -429,6 +429,28 @@ html{scroll-behavior:smooth}
  .ob-example .ob-example-copy h3,.ob-example aside b{font-size:clamp(24px,3vw,30px)!important}
  .ob-example aside li{margin:16px 0!important}
 }
+
+/* Result card heading baseline: identical typography and vertical start. */
+@media(min-width:901px){
+ .ob-example .ob-example-copy{
+  justify-content:flex-start!important;
+  padding-top:20px!important;
+ }
+ .ob-example aside{
+  align-self:start!important;
+  padding:20px 12px 12px 0!important;
+ }
+}
+.ob-example .ob-example-copy h3,
+.ob-example aside > b{
+ display:block!important;
+ font-family:Georgia,serif!important;
+ font-weight:600!important;
+ font-style:normal!important;
+ font-size:clamp(26px,2.1vw,34px)!important;
+ line-height:1.18!important;
+ letter-spacing:normal!important;
+}
 </style>
 """
 
