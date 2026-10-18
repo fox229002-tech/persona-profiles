@@ -182,7 +182,7 @@ html{scroll-behavior:smooth}
 /* Fine typography and horizontal alignment adjustments */
 @media(min-width:901px){
  #how .ob-step h3{font-size:27px!important;line-height:1.16!important;min-height:66px}
- #how .ob-compat-new .ob-compat-body{transform:translateX(56px);max-width:870px!important;margin-left:0!important;margin-right:0!important}
+ #how .ob-compat-new .ob-compat-body{transform:translateX(112px);max-width:870px!important;margin-left:0!important;margin-right:0!important}
 }
 @media(min-width:651px) and (max-width:900px){
  #how .ob-step h3{font-size:23px!important;line-height:1.2!important}
