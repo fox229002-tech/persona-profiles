@@ -399,6 +399,21 @@ html{scroll-behavior:smooth}
  .ob-example .ob-example-copy h3{font-size:28px!important}
  .ob-example .ob-example-details summary{width:100%;padding:15px}
 }
+
+/* Final editorial layout for result cards */
+#example h2,#compat-example h2{font-size:clamp(30px,2.85vw,43px)!important;line-height:1.15!important;margin-bottom:30px!important}
+.ob-example,.ob-example-compat{align-items:stretch!important}
+.ob-example .ob-example-copy{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.ob-example .ob-example-copy h3{margin-bottom:8px!important}
+.ob-example .ob-example-tagline{font:italic 500 clamp(17px,1.25vw,21px) Georgia,serif;color:#6E5C8E;margin-bottom:22px}
+.ob-example .ob-example-copy p{margin-bottom:0!important}
+.ob-example .ob-example-details{margin-top:26px!important}
+.ob-example aside{align-self:center;background:transparent!important;border:0!important;box-shadow:none!important;padding:12px 12px 12px 0!important;margin-right:clamp(34px,4vw,62px)!important}
+.ob-example aside b{font-size:clamp(20px,1.5vw,24px)!important}
+.ob-example aside li{margin:15px 0!important}
+.ob-example .ob-example-botanical{width:clamp(280px,38%,560px)!important;-webkit-mask-image:linear-gradient(to right,transparent 0%,transparent 77%,#000 98%)!important;mask-image:linear-gradient(to right,transparent 0%,transparent 77%,#000 98%)!important}
+@media(max-width:900px){.ob-example aside{margin-right:40px!important}.ob-example .ob-example-botanical{width:40%!important;opacity:.5!important}}
+@media(max-width:650px){#example h2,#compat-example h2{font-size:30px!important}.ob-example aside{margin-right:0!important;padding:8px 0!important}.ob-example .ob-example-botanical{width:65%!important;opacity:.2!important}.ob-example .ob-example-tagline{margin-bottom:16px}}
 </style>
 """
 
@@ -449,7 +464,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Профиль»</h2>
         <div class="ob-example">
           {img("primer_profile.webp", "Иллюстрация профиля")}
-          <div class="ob-example-copy"><h3>Профиль личности</h3><p>Исследуйте особенности своего характера через близкие вам образы. Узнайте, какие качества помогают вам справляться с задачами, как проявляются привычные реакции и что может становиться источником перегрузки.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера профиля пока не предоставлен. Добавим утверждённый пример без вымышленных результатов.</div></details></div>
+          <div class="ob-example-copy"><h3>Профиль личности</h3><div class="ob-example-tagline">Ваши особенности — ваш ресурс</div><p>Исследуйте особенности своего характера через близкие вам образы. Узнайте, какие качества помогают вам справляться с задачами, как проявляются привычные реакции и что может становиться источником перегрузки.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера профиля пока не предоставлен. Добавим утверждённый пример без вымышленных результатов.</div></details></div>
           <aside><b>Что вы узнаете</b><ul><li>Сильные стороны и ресурсы</li><li>Привычные реакции</li><li>Зоны перегрузки</li><li>Рекомендации для повседневной жизни</li></ul></aside>
           {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
@@ -462,7 +477,7 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Совместимость»</h2>
         <div class="ob-example ob-example-compat">
           {img("primer_sovmestimost.webp", "Иллюстрация совместимости")}
-          <div class="ob-example-copy"><h3>Два профиля —<br>один союз</h3><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера совместимости пока не предоставлен. Добавим утверждённый пример.</div></details></div>
+          <div class="ob-example-copy"><h3>Два профиля —<br>один союз</h3><div class="ob-example-tagline">Понять друг друга глубже</div><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p><details class="ob-example-details"><summary>Посмотреть полный пример</summary><div class="ob-example-placeholder">Полный текст примера совместимости пока не предоставлен. Добавим утверждённый пример.</div></details></div>
           <aside><b>В разборе</b><ul><li>Точки соприкосновения</li><li>Возможные противоречия</li><li>Сценарии взаимодействия</li><li>Практические рекомендации</li></ul></aside>
           {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
