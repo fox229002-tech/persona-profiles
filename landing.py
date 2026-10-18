@@ -547,6 +547,13 @@ html{scroll-behavior:smooth}
 .ob-price .ob-price-lines{margin-bottom:14px!important}
 .ob-price strong{margin-top:0!important}
 .ob-price a{margin-top:10px!important}
+
+/* Tariffs: keep the copy, price and CTA together below the heading */
+.ob-price{justify-content:flex-start!important}
+.ob-price h3{margin-bottom:15px!important}
+.ob-price .ob-price-lines{margin-top:0!important;margin-bottom:12px!important}
+.ob-price strong{margin-top:0!important}
+.ob-price a{margin-top:10px!important}
 </style>
 """
 
