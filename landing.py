@@ -256,20 +256,34 @@ html{scroll-behavior:smooth}
 @media(max-width:650px){
  #how .ob-step h3{height:76px}
 }
-/* Compatibility: stable left alignment at all desktop zoom levels.
-   Reserve the right botanical edge instead of centering the copy. */
+/* Compatibility: protect the botanical edges and give all three steps
+   readable columns across desktop browser zoom levels. */
 @media(min-width:901px){
  #how .ob-compat-new .ob-compat-body{
   padding-left:20%!important;
-  padding-right:9%!important;
+  padding-right:11%!important;
   width:100%!important;
   margin:0!important;
  }
  #how .ob-compat-new .ob-compat-steps{
-  grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) minmax(0,.72fr)!important;
-  gap:20px!important;
+  grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr)!important;
+  gap:18px!important;
  }
- #how .ob-compat-new .ob-compat-step p{overflow-wrap:break-word}
+ #how .ob-compat-new .ob-compat-step{gap:10px!important}
+ #how .ob-compat-new .ob-compat-number{flex:0 0 44px;width:44px;height:44px}
+ #how .ob-compat-new .ob-compat-step p{
+  font-size:clamp(16px,1.3vw,19px)!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  hyphens:none!important;
+ }
+}
+@media(min-width:901px) and (max-width:1150px){
+ #how .ob-compat-new .ob-compat-steps{
+  grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important;
+  row-gap:18px!important;
+ }
+ #how .ob-compat-new .ob-compat-step:last-child{grid-column:2}
 }
 </style>
 """
