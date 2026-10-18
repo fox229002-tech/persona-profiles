@@ -676,6 +676,8 @@ html{scroll-behavior:smooth}
 .ob-faq summary::-webkit-details-marker{display:none}
 .ob-faq summary::before{content:"";display:inline-block;flex:0 0 8px;width:8px;height:8px;border-right:2px solid #6E5C8E;border-bottom:2px solid #6E5C8E;transform:rotate(-45deg);transition:transform .2s ease}
 .ob-faq details[open] > summary::before{transform:rotate(45deg)}
+/* FAQ anchor must be a rendered element, even when its section uses display:contents. */
+#faq{scroll-margin-top:32px}
 /* Shared grid rows: headings and content align at every desktop zoom. */
 @media(min-width:901px){
  .ob-two{
@@ -793,7 +795,7 @@ def render_landing(price_profile: int, price_full: int):
           <p>Образы становятся отправной точкой для размышлений о привычках, реакциях и особенностях характера, которые определяют взаимодействие человека с окружающим миром</p>
           </div>
         </section>
-        <section class="ob-section ob-faq" id="faq"><h2>Частые вопросы</h2>
+        <section class="ob-section ob-faq"><h2 id="faq">Частые вопросы</h2>
         <div class="ob-faq-body">
 <details><summary>Это психологический тест или гадание на кофейной гуще?</summary>
 <p>Ни то ни другое.</p>
