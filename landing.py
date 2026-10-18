@@ -493,6 +493,27 @@ html{scroll-behavior:smooth}
  .ob-price p{font-size:15px!important}
  .ob-price a{font-size:17px!important;padding:13px 28px!important}
 }
+
+/* Tariffs: matched vertical rhythm, readable copy, and checkmark lists */
+.ob-price{isolation:isolate}
+.ob-price img{object-fit:cover!important;object-position:right bottom!important}
+.ob-price h3{margin-bottom:4px!important;min-height:2.3em!important;max-width:62%!important}
+.ob-price .ob-price-sub{position:relative;z-index:1;color:#6E5C8E;font:italic 21px/1.3 Georgia,serif;max-width:58%;margin:0 0 22px}
+.ob-price .ob-price-list{position:relative;z-index:1;list-style:none;padding:0;margin:0 0 16px;max-width:55%;width:55%;font-size:17px;line-height:1.4}
+.ob-price .ob-price-list li{display:flex;align-items:flex-start;gap:10px;margin:0 0 11px}
+.ob-price .ob-price-list li:before{content:"✓";display:inline-flex;flex:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#709f8e;color:#fff;font:bold 16px Arial,sans-serif}
+.ob-price strong{font-family:Georgia,serif!important;font-weight:700!important;font-size:36px!important;max-width:58%!important}
+.ob-price a{max-width:58%!important}
+@media(max-width:900px){
+ .ob-price .ob-price-list{max-width:62%;width:62%;font-size:15px}
+ .ob-price h3{font-size:clamp(25px,3vw,34px)!important}
+ .ob-price .ob-price-sub{font-size:18px}
+}
+@media(max-width:650px){
+ .ob-price .ob-price-list{max-width:70%;width:70%;font-size:14px}
+ .ob-price h3{max-width:75%!important;min-height:2.3em!important}
+ .ob-price .ob-price-sub{max-width:70%}
+}
 </style>
 """
 
@@ -568,8 +589,8 @@ def render_landing(price_profile: int, price_full: int):
       <section class="ob-section" id="prices">
         <h2>Тарифы</h2>
         <div class="ob-price-grid">
-          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><p>Полный разбор личности<br>Сильные стороны и ресурсы<br>Зоны перегрузки<br>Рекомендации</p><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
-          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль + совместимость</h3><p>Ваш полный профиль<br>Анализ совместимости<br>Сильные и уязвимые стороны союза<br>Рекомендации</p><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_profile.webp", "Тариф Профиль")}<h3>Профиль</h3><div class="ob-price-sub">для себя</div><ul class="ob-price-list"><li>Полный разбор личности</li><li>Сильные стороны и ресурсы</li><li>Зоны перегрузки</li><li>Рекомендации</li></ul><strong>{price_profile} ₽</strong><a href="?view=research">Выбрать</a></article>
+          <article class="ob-price">{img("cena_sovmestimost.webp", "Тариф Профиль и совместимость")}<h3>Профиль и<br>совместимость</h3><div class="ob-price-sub">для двоих</div><ul class="ob-price-list"><li>Ваш полный профиль</li><li>Анализ совместимости</li><li>Сильные и уязвимые стороны союза</li><li>Рекомендации</li></ul><strong>{price_full} ₽</strong><a href="?view=research">Выбрать</a></article>
         </div>
       </section>
       <div class="ob-two">
