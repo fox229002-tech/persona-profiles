@@ -95,6 +95,17 @@ html{scroll-behavior:smooth}
 .ob-faq summary,.ob-example summary{cursor:pointer;font-weight:600}
 .ob-faq details p,.ob-example details p{font-size:15px;line-height:1.6}
 .ob-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;background:#eee9e5;padding:25px 3%;border:0}
+/* Footer: full-width aligned details, legal documents, and age badge. */
+.ob-page .ob-footer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) auto;align-items:center;column-gap:32px;row-gap:20px;padding:30px 4%;width:100%;margin-top:75px}
+.ob-footer-details,.ob-footer-docs{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0}
+.ob-footer-details strong{font-size:16px}
+.ob-footer-docs{gap:10px}
+.ob-footer a{margin:0;color:#5E4A7B;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.ob-footer-copyright{max-width:500px;font-size:13px;line-height:1.5;color:#59545f}
+.ob-footer-unavailable{font-size:14px;color:#777}
+.ob-footer-age{display:flex;align-items:center;justify-content:center;width:66px;height:66px;border:3px solid #6E5C8E;border-radius:50%;font-size:22px;font-weight:800;color:#5E4A7B;white-space:nowrap}
+@media(max-width:700px){.ob-page .ob-footer{grid-template-columns:1fr auto;gap:22px}.ob-footer-docs{grid-column:1;grid-row:2}.ob-footer-age{grid-column:2;grid-row:1;align-self:start}}
+
 @media(max-width:900px){.ob-hero{aspect-ratio:auto;min-height:470px}.ob-example{grid-template-columns:35% 1fr}.ob-example aside{grid-column:1/-1}}
 @media(max-width:650px){.block-container{padding-left:1rem!important;padding-right:1rem!important}.ob-hero{min-height:590px}.ob-hero-content{width:100%;padding:45px 7%}.ob-hero-image{opacity:.5}.ob-grid4{grid-template-columns:repeat(2,1fr)}.ob-example{grid-template-columns:1fr}.ob-example aside{grid-column:auto}.ob-two{grid-template-columns:1fr}.ob-price h3,.ob-price p,.ob-price strong,.ob-price a{max-width:75%}}
 
@@ -825,11 +836,39 @@ def render_landing(price_profile: int, price_full: int):
       </div>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('<div class="ob-page"><footer class="ob-footer"><strong>Образы</strong><span>Оферта · Политика конфиденциальности · Контакты</span><span>ИП Фофанова · реквизиты уточняются</span><span>18+</span></footer></div>', unsafe_allow_html=True)
-    docs = [("Оферта","oferta.pdf"),("Политика конфиденциальности","privacy.pdf")]
-    available = [(label, ASSETS / filename) for label,filename in docs if (ASSETS / filename).exists()]
-    if available:
-        cols=st.columns(len(available))
-        for col,(label,path) in zip(cols,available):
-            with col:
-                st.download_button(f"Скачать: {label}",path.read_bytes(),file_name=path.name,mime="application/pdf")
+    # Footer documents: support drafts with varying PDF filenames in assets.
+    pdfs = sorted(ASSETS.glob("*.pdf"))
+    def footer_doc(names):
+        for name in names:
+            exact = ASSETS / name
+            if exact.is_file():
+                return exact
+        return next((p for p in pdfs if any(key in p.stem.lower() for key in names)), None)
+
+    oferta = footer_doc(("oferta.pdf", "оферта", "oferta", "offer"))
+    privacy = footer_doc(("privacy.pdf", "политик", "privacy", "personal", "персональ"))
+    def footer_link(label, path):
+        if path is None:
+            return f'<span class="ob-footer-unavailable">{html.escape(label)} (файл не найден)</span>'
+        encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+        return (f'<a href="data:application/pdf;base64,{encoded}" '
+                f'download="{html.escape(path.name, quote=True)}">{html.escape(label)} ↓</a>')
+
+    st.markdown(f"""
+    <div class="ob-page">
+      <footer class="ob-footer">
+        <div class="ob-footer-details">
+          <strong>ИП Фофанова О. И.</strong>
+          <span>ИНН 780712114304</span>
+          <span>ОГРНИП 316784700253223</span>
+          <a href="mailto:9312346235@mail.ru">9312346235@mail.ru</a>
+        </div>
+        <div class="ob-footer-docs">
+          {footer_link("Публичная оферта", oferta)}
+          {footer_link("Политика конфиденциальности", privacy)}
+          <span class="ob-footer-copyright">Все права защищены. Материалы сайта охраняются законодательством об авторском праве.</span>
+        </div>
+        <strong class="ob-footer-age" aria-label="Только для лиц старше 18 лет">18+</strong>
+      </footer>
+    </div>
+    """, unsafe_allow_html=True)
