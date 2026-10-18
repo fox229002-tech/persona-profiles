@@ -179,6 +179,23 @@ html{scroll-behavior:smooth}
 @media(max-width:900px){#how .ob-grid4{gap:22px!important}#how .ob-step-top{gap:12px}#how .ob-step h3{font-size:19px!important}}
 @media(max-width:650px){#how .ob-step-top{height:72px}#how .ob-step-top img{width:60px;height:60px}#how .ob-step-top .ob-step-number{width:40px;height:40px;flex-basis:40px;font-size:20px}#how .ob-step h3{min-height:0}}
 
+/* Keep botanical artwork at its native aspect ratio: zoom and text
+   wrapping must not make the flowers grow to fill a taller card. */
+#how .ob-compat-new .ob-compat-art{
+ top:auto!important;
+ bottom:0!important;
+ left:0!important;
+ right:auto!important;
+ width:100%!important;
+ height:auto!important;
+ max-width:none!important;
+ object-fit:contain!important;
+ object-position:center bottom!important;
+}
+@media(max-width:650px){
+ #how .ob-compat-new .ob-compat-art{opacity:.35}
+}
+
 /* Responsive composition: align all compatibility copy within one
    proportional inner column, never shift it with a fixed pixel transform. */
 #how .ob-compat-new .ob-compat-body{
