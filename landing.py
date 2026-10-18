@@ -483,7 +483,7 @@ html{scroll-behavior:smooth}
 
 /* Tariff cards: consistent headings, uncropped centered artwork, prominent CTAs. */
 .ob-price{min-height:320px!important;padding:34px 38px!important}
-.ob-price img{object-fit:fill!important;object-position:center center!important}
+.ob-price img{object-fit:cover!important;object-position:right center!important}
 .ob-price h3{font:500 clamp(30px,2.7vw,38px)/1.15 Georgia,serif!important;max-width:78%!important;min-height:2.3em;margin:0 0 20px!important}
 .ob-price p{font-size:17px!important;line-height:1.55!important}
 .ob-price a{display:inline-flex!important;align-items:center;justify-content:center;font-size:19px!important;font-weight:600!important;padding:15px 34px!important;border-radius:32px!important;margin-top:16px!important}
