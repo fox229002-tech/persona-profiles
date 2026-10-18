@@ -292,6 +292,58 @@ html{scroll-behavior:smooth}
  }
  #how .ob-compat-new .ob-compat-step:last-child{grid-column:2}
 }
+
+/* Unified result-preview cards. Botanical artwork is decorative and never
+   determines the text layout. */
+.ob-example,.ob-example-compat{
+ position:relative;
+ isolation:isolate;
+ overflow:hidden;
+ background:#E5EFE9!important;
+ border-radius:24px;
+ grid-template-columns:minmax(0,29%) minmax(0,1fr) minmax(0,28%);
+ gap:clamp(16px,2.5vw,32px);
+ padding:clamp(20px,2.4vw,34px);
+ align-items:center;
+}
+.ob-example > img:first-child{
+ display:block;width:100%;height:auto;aspect-ratio:1/1;
+ object-fit:cover;max-height:none;border-radius:22px;
+ position:relative;z-index:1;
+}
+.ob-example .ob-example-copy{position:relative;z-index:2}
+.ob-example .ob-example-copy h3{margin:0 0 14px!important}
+.ob-example .ob-example-copy p{margin:0;line-height:1.55}
+.ob-example aside{
+ position:relative;z-index:2;
+ background:rgba(246,244,239,.88)!important;
+ padding:20px 20px 20px 22px;
+ border-radius:18px;
+}
+.ob-example aside ul{margin-bottom:0}
+.ob-example .ob-example-botanical{
+ position:absolute!important;z-index:1!important;
+ width:clamp(105px,13%,190px)!important;
+ height:auto!important;max-height:none!important;
+ right:-12px;bottom:-14px;
+ border-radius:0!important;
+ pointer-events:none;
+ opacity:.85;
+}
+@media(min-width:901px){
+ .ob-example aside{margin-right:clamp(22px,3vw,42px)}
+}
+@media(max-width:900px){
+ .ob-example,.ob-example-compat{grid-template-columns:minmax(0,35%) minmax(0,1fr)}
+ .ob-example aside{grid-column:2}
+ .ob-example .ob-example-botanical{width:130px!important;opacity:.45}
+}
+@media(max-width:650px){
+ .ob-example,.ob-example-compat{grid-template-columns:minmax(0,1fr);gap:18px}
+ .ob-example > img:first-child{width:min(100%,330px);margin-inline:auto}
+ .ob-example aside{grid-column:auto;margin-right:0}
+ .ob-example .ob-example-botanical{width:110px!important;opacity:.3}
+}
 </style>
 """
 
@@ -342,7 +394,9 @@ def render_landing(price_profile: int, price_full: int):
         <h2>Пример результата «Профиль»</h2>
         <div class="ob-example">
           {img("primer_profile.webp", "Иллюстрация профиля")}
-          <div><h3>Профиль личности</h3><p>Особенности образа жизни, привычные реакции, точки перегрузки и способы адаптации.</p></div><aside><b>Что вы узнаете</b><ul><li>Сильные стороны</li><li>Привычные реакции</li><li>Зоны перегрузки</li><li>Рекомендации</li></ul></aside>
+          <div class="ob-example-copy"><h3>Профиль личности</h3><p>Исследуйте особенности своего характера через близкие вам образы. Узнайте, какие качества помогают вам справляться с задачами, как проявляются привычные реакции и что может становиться источником перегрузки.</p></div>
+          <aside><b>Что вы узнаете</b><ul><li>Сильные стороны и ресурсы</li><li>Привычные реакции</li><li>Зоны перегрузки</li><li>Рекомендации для повседневной жизни</li></ul></aside>
+          {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
       </section>
     </div>
@@ -353,9 +407,11 @@ def render_landing(price_profile: int, price_full: int):
     <div class="ob-page">
       <section class="ob-section" id="compat-example">
         <h2>Пример результата «Совместимость»</h2>
-        <div class="ob-example">
+        <div class="ob-example ob-example-compat">
           {img("primer_sovmestimost.webp", "Иллюстрация совместимости")}
-          <div><h3>Два профиля — один союз</h3><p>Сильные стороны отношений, возможные противоречия и способы взаимопонимания.</p></div><aside><b>В разборе</b><ul><li>Точки соприкосновения</li><li>Возможные конфликты</li><li>Сценарии развития</li><li>Практические советы</li></ul></aside>
+          <div class="ob-example-copy"><h3>Два профиля — один союз</h3><p>Посмотрите, в чём ваши особенности дополняют друг друга, где могут возникать недопонимания и какие подходы помогут выстраивать более осознанное взаимодействие.</p></div>
+          <aside><b>В разборе</b><ul><li>Точки соприкосновения</li><li>Возможные противоречия</li><li>Сценарии взаимодействия</li><li>Практические рекомендации</li></ul></aside>
+          {img("primer_rightside.webp", "", "ob-example-botanical")}
         </div>
       </section>
     </div>
