@@ -154,3 +154,45 @@ function temporaryResult_(p) {
   }
   throw Error('unknown_temporary_action');
 }
+
+
+/**
+ * Изолированная проверка temp_save/temp_get.
+ * Создаёт отдельный фиктивный заказ в журнале; реальных заказов не меняет.
+ * Проверяет передачу ФИКТИВНОГО шифротекста, но НЕ криптографию Fernet.
+ * Запускать вручную в Apps Script: cleanupTestTemporaryResult().
+ */
+function cleanupTestTemporaryResult() {
+  const id = 'OBR-TEST-' + Utilities.getUuid();
+  const secret = Utilities.getUuid() + Utilities.getUuid();
+  const hashBytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, secret);
+  const hash = hashBytes.map(b => ('0' + (b & 255).toString(16)).slice(-2)).join('');
+  // Допустимый по формату, но не настоящий Fernet-токен.
+  const fakeCiphertext = 'gAAAAAB' + Utilities.getUuid().replace(/-/g, '') +
+    Utilities.getUuid().replace(/-/g, '') + '==';
+
+  run({action:'create_order', order_id:id, tariff:'test', amount_rub:0});
+  run({action:'update_order', order_id:id, service_status:'completed'});
+  const saved = run({action:'temp_save', order_id:id,
+    operation:'profile', recovery_hash:hash, ciphertext:fakeCiphertext});
+  const loaded = run({action:'temp_get', order_id:id,
+    operation:'profile', recovery_hash:hash});
+  if (!saved.ok || !loaded.ok || loaded.status !== 'available' ||
+      loaded.ciphertext !== fakeCiphertext) throw Error('roundtrip_failed');
+
+  let denied = false;
+  try {
+    run({action:'temp_get', order_id:id, operation:'profile',
+      recovery_hash:'0'.repeat(64)});
+  } catch (err) {
+    denied = String(err.message || err) === 'access_denied';
+  }
+  if (!denied) throw Error('wrong_secret_not_denied');
+
+  const result = {ok:true, test_order_id:id, save:'passed',
+    restore:'passed', wrong_secret:'denied',
+    expires_at:new Date(saved.expires_at_ms).toISOString(),
+    note:'Mock ciphertext only; real encryption not tested'};
+  Logger.log(JSON.stringify(result));
+  return result;
+}
