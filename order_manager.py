@@ -24,21 +24,27 @@ def sha256(data):
 
 
 class OrderManager:
-    def __init__(self, script_url, token):
+    def __init__(self, script_url, token, *, test_failure=None):
         if not script_url.startswith("https://script.google.com/macros/s/") or not script_url.endswith("/exec"):
             raise ValueError("Неверный адрес опубликованного Apps Script")
         if not token:
             raise ValueError("Не задан секрет журнала")
         self.url = script_url
         self.token = token
+        self.test_failure = test_failure
 
     @classmethod
     def from_streamlit_secrets(cls):
         import streamlit as st
         cfg = st.secrets["order_journal"]
-        return cls(str(cfg["script_url"]), str(cfg["token"]))
+        failure = None
+        if st.secrets.get("TEST_FAILURE_MODE", False) and st.secrets.get("APP_PASSWORD") and st.session_state.get("authenticated", False):
+            failure = st.session_state.get("journal_test_failure", "none")
+        return cls(str(cfg["script_url"]), str(cfg["token"]), test_failure=failure)
 
     def _call(self, action, **fields):
+        if self.test_failure == "all" or self.test_failure == action:
+            raise JournalError("Тестовый сбой журнала: " + action)
         payload_request = {"token": self.token, "action": action, **fields}
         for attempt in range(3):
             try:
