@@ -347,8 +347,13 @@ def navigate(step):
     st.rerun()
 
 if st.query_params.get("view") == "research":
+    requested_plan = st.query_params.get("plan")
     st.session_state.site_page = "Исследование"
-    st.session_state.research_step = "choose"
+    if requested_plan in PLANS:
+        st.session_state.checkout_plan = requested_plan
+        st.session_state.research_step = "checkout"
+    else:
+        st.session_state.research_step = "choose"
     st.query_params.clear()
 
 page = st.session_state.get("site_page", "Главная")
