@@ -321,17 +321,31 @@ def journal_event(event_type, *, result=None, operation="", status="ok"):
 
 
 def journal_result(result, operation, download_text):
-    """Регистрируем результат и хеш байтов файла до показа."""
+    """Записываем каждый этап один раз; после сбоя продолжаем с незавершённого."""
     manager = journal()
     order_id = st.session_state.get("order_id")
     if not manager or not order_id:
         if st.secrets.get("REQUIRE_JOURNAL", False):
             raise JournalError("Нет подтверждённого заказа")
         return
-    journal_event("ai_response", result=result, operation=operation)
-    journal_event("download_file_hash", result=download_text.encode("utf-8"),
-                  operation=operation)
-    manager.update_order(order_id, result=result, service_status="completed")
+
+    # Один и тот же результат в одном заказе всегда получает те же ID событий.
+    result_key = str(uuid.uuid5(uuid.NAMESPACE_URL, order_id + ":" + operation + ":" + result))
+    for event_type, value in (
+        ("ai_response", result),
+        ("download_file_hash", download_text.encode("utf-8")),
+    ):
+        done_key = f"journal_done_{result_key}_{event_type}"
+        if not st.session_state.get(done_key):
+            event_id = str(uuid.uuid5(uuid.NAMESPACE_URL, result_key + ":" + event_type))
+            manager.log_event(order_id, event_type, operation=operation,
+                              result=value, event_id=event_id)
+            st.session_state[done_key] = True
+
+    completed_key = f"journal_done_{result_key}_completed"
+    if not st.session_state.get(completed_key):
+        manager.update_order(order_id, result=result, service_status="completed")
+        st.session_state[completed_key] = True
 
 
 def process_payment(plan_key: str, amount: int) -> bool:
@@ -517,9 +531,9 @@ elif step == "descriptions":
         if st.button("Продолжить", disabled=not chosen):
             with st.spinner("Готовлю ваш результат..."):
                 try:
-                    journal_event("ai_request", operation="profile")
                     pending = st.session_state.get("pending_profile_result")
                     if pending is None:
+                        journal_event("ai_request", operation="profile")
                         result = analyze(chosen)
                         download_text = build_profile_text(chosen, result)
                         st.session_state.pending_profile_result = (result, download_text)
@@ -611,9 +625,9 @@ elif step == "compat_input":
             with st.spinner("Анализирую сочетание..."):
                 try:
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
-                    journal_event("ai_request", operation="compatibility")
                     pending = st.session_state.get("pending_compat_result")
                     if pending is None:
+                        journal_event("ai_request", operation="compatibility")
                         result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
                         download_text = (
                             f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
