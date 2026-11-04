@@ -4,6 +4,7 @@ import hmac
 import random
 import re
 import time
+import uuid
 from pathlib import Path
 
 import requests
@@ -299,6 +300,8 @@ PLANS = {
 def journal():
     """Журнал включается после настройки Apps Script в Secrets."""
     if "order_journal" not in st.secrets:
+        if st.secrets.get("REQUIRE_JOURNAL", False):
+            raise JournalError("Журнал заказов не настроен")
         return None
     return OrderManager.from_streamlit_secrets()
 
@@ -306,28 +309,44 @@ def journal():
 def journal_event(event_type, *, result=None, operation="", status="ok"):
     manager = journal()
     order_id = st.session_state.get("order_id")
-    if manager and order_id:
-        manager.log_event(order_id, event_type, operation=operation,
-                          status=status, result=result)
+    if not manager or not order_id:
+        if st.secrets.get("REQUIRE_JOURNAL", False):
+            raise JournalError("Нет подтверждённого заказа")
+        return
+    key = f"journal_event_id_{event_type}_{operation}"
+    event_id = st.session_state.setdefault(key, str(uuid.uuid4()))
+    manager.log_event(order_id, event_type, operation=operation,
+                      status=status, result=result, event_id=event_id)
+    st.session_state.pop(key, None)
 
 
-def journal_result(result, operation):
+def journal_result(result, operation, download_text):
+    """Регистрируем результат и хеш байтов файла до показа."""
     manager = journal()
     order_id = st.session_state.get("order_id")
-    if manager and order_id:
-        manager.update_order(order_id, result=result, service_status="completed")
-        journal_event("ai_response", result=result, operation=operation)
+    if not manager or not order_id:
+        if st.secrets.get("REQUIRE_JOURNAL", False):
+            raise JournalError("Нет подтверждённого заказа")
+        return
+    journal_event("ai_response", result=result, operation=operation)
+    journal_event("download_file_hash", result=download_text.encode("utf-8"),
+                  operation=operation)
+    manager.update_order(order_id, result=result, service_status="completed")
 
 
 def process_payment(plan_key: str, amount: int) -> bool:
-    """ЗАГЛУШКА. Здесь подключается реальная оплата (ЮKassa, Stripe и т.п.):
-    создать платёж на сумму amount, дождаться подтверждения и вернуть True/False."""
+    """Демонстрационная оплата; реальных списаний нет."""
     manager = journal()
     if manager:
-        # При ошибке журнала оплату не запускаем.
-        order_id = manager.create_order(plan_key, amount)
+        pending = st.session_state.get("pending_order")
+        if not pending or pending["plan"] != plan_key or pending["amount"] != amount:
+            pending = {"plan": plan_key, "amount": amount,
+                       "id": "OBR-" + uuid.uuid4().hex[:20].upper()}
+            st.session_state.pending_order = pending
+        order_id = manager.create_order(plan_key, amount, order_id=pending["id"])
         st.session_state.order_id = order_id
-        manager.log_event(order_id, "payment_demo", operation=plan_key, status="simulated")
+        journal_event("payment_demo", operation=plan_key, status="simulated")
+        st.session_state.pop("pending_order", None)
     return True
 
 
@@ -496,13 +515,11 @@ elif step == "descriptions":
                 try:
                     journal_event("ai_request", operation="profile")
                     result = analyze(chosen)
+                    download_text = build_profile_text(chosen, result)
+                    journal_result(result, "profile", download_text)
                     st.session_state.result = result
-                    st.session_state.profile_text = build_profile_text(chosen, result)
+                    st.session_state.profile_text = download_text
                     st.session_state.profile_download_clicked = False
-                    try:
-                        journal_result(result, "profile")
-                    except Exception as journal_exc:
-                        st.warning(f"Результат готов, но журнал не обновился: {journal_exc}")
                     st.session_state.pop("profile_display_logged", None)
                     navigate("profile_result")
                 except Exception as exc:
@@ -586,15 +603,13 @@ elif step == "compat_input":
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
                     journal_event("ai_request", operation="compatibility")
                     result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
+                    download_text = (
+                        f"РАЗБОР СОВМЕСТИМОСТИ\\n{na} и {nb} ({relation})\\n\\n{result}"
+                    )
+                    journal_result(result, "compatibility", download_text)
                     st.session_state.compat = result
                     st.session_state.compat_download_clicked = False
-                    st.session_state.compat_text = (
-                        f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
-                    )
-                    try:
-                        journal_result(result, "compatibility")
-                    except Exception as journal_exc:
-                        st.warning(f"Результат готов, но журнал не обновился: {journal_exc}")
+                    st.session_state.compat_text = download_text
                     st.session_state.pop("compat_display_logged", None)
                     navigate("compat_result")
                 except Exception as exc:
