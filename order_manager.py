@@ -2,7 +2,9 @@
 import hashlib
 import re
 import uuid
-from datetime import datetime, timezone
+import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -14,7 +16,7 @@ class JournalError(RuntimeError):
 
 
 def now():
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(ZoneInfo("Europe/Moscow")).strftime("%d.%m.%Y %H:%M:%S")
 
 
 def sha256(data):
@@ -37,26 +39,29 @@ class OrderManager:
         return cls(str(cfg["script_url"]), str(cfg["token"]))
 
     def _call(self, action, **fields):
-        try:
-            response = requests.post(
-                self.url,
-                json={"token": self.token, "action": action, **fields},
-                timeout=25,
-            )
-            response.raise_for_status()
-            payload = response.json()
-            if not isinstance(payload, dict) or not payload.get("ok"):
-                raise JournalError("Apps Script отклонил операцию: " + str(payload.get("error", "unknown")))
-            return payload
-        except (requests.RequestException, ValueError) as exc:
-            raise JournalError("Нет подтверждения записи в журнал") from exc
+        payload_request = {"token": self.token, "action": action, **fields}
+        for attempt in range(3):
+            try:
+                response = requests.post(self.url, json=payload_request, timeout=25)
+                response.raise_for_status()
+                payload = response.json()
+                if not isinstance(payload, dict) or not payload.get("ok"):
+                    raise JournalError("Apps Script отклонил операцию: " + str(
+                        payload.get("error", "unknown") if isinstance(payload, dict) else "invalid_response"))
+                return payload
+            except (requests.RequestException, ValueError) as exc:
+                if attempt == 2:
+                    raise JournalError("Нет подтверждения записи в журнал") from exc
+                time.sleep(attempt + 1)
 
-    def create_order(self, tariff, amount_rub):
+    def create_order(self, tariff, amount_rub, *, order_id=None):
         if not isinstance(tariff, str) or not CODE.fullmatch(tariff):
             raise ValueError("Неверный тариф")
         if type(amount_rub) is not int or amount_rub < 0:
             raise ValueError("Неверная сумма")
-        order_id = "OBR-" + uuid.uuid4().hex[:20].upper()
+        order_id = order_id or ("OBR-" + uuid.uuid4().hex[:20].upper())
+        if not CODE.fullmatch(order_id):
+            raise ValueError("Неверный номер заказа")
         self._call("create_order", order_id=order_id, tariff=tariff, amount_rub=amount_rub)
         return order_id
 
