@@ -573,6 +573,9 @@ with tab_compat:
             st.markdown(st.session_state.compat)
             if not st.session_state.get("compat_display_logged"):
                 try:
+                    manager = journal()
+                    if manager and st.session_state.get("order_id"):
+                        manager.update_order(st.session_state.order_id, result_displayed=True)
                     journal_event("result_displayed", operation="compatibility")
                     st.session_state.compat_display_logged = True
                 except Exception as e:
