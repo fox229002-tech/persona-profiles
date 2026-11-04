@@ -196,3 +196,27 @@ function cleanupTestTemporaryResult() {
   Logger.log(JSON.stringify(result));
   return result;
 }
+
+
+/** Проверить истечение срока для последнего фиктивного заказа из теста. */
+function cleanupTestExpiredResult() {
+  const s = sheet('Заказы');
+  const last = s.getLastRow();
+  if (last < 2) throw Error('no_test_orders');
+  const ids = s.getRange(2, 1, last - 1, 1).getValues();
+  let id = '';
+  for (let i = ids.length - 1; i >= 0; i--) {
+    if (String(ids[i][0]).startsWith('OBR-TEST-')) {
+      id = String(ids[i][0]); break;
+    }
+  }
+  if (!id) throw Error('no_test_orders');
+  // Для истёкшего файла хеш не требуется: temp_get возвращает expired
+  // до проверки секрета. Для ещё действующего файла это будет access_denied.
+  const response = run({action:'temp_get', order_id:id,
+    operation:'profile', recovery_hash:'0'.repeat(64)});
+  if (response.status !== 'expired') throw Error('expired_result_still_available');
+  const result = {ok:true, test_order_id:id, expired_access:'denied'};
+  Logger.log(JSON.stringify(result));
+  return result;
+}
