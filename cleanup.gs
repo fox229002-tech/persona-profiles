@@ -25,16 +25,21 @@ function cleanupFolder_() {
 
 function cleanupSetup() {
   const props = PropertiesService.getScriptProperties();
-  if (props.getProperty(CLEANUP_FOLDER_PROP)) {
-    throw Error('Test folder already configured; refusing to create another');
+  let id = props.getProperty(CLEANUP_FOLDER_PROP);
+  let folder;
+  if (id) {
+    folder = DriveApp.getFolderById(id);
+  } else {
+    folder = DriveApp.createFolder('Образы — ТЕСТ временного хранения');
+    props.setProperty(CLEANUP_FOLDER_PROP, folder.getId());
+    props.setProperty(CLEANUP_DELETED_PROP, '0');
   }
-  const folder = DriveApp.createFolder('Образы — ТЕСТ временного хранения');
-  props.setProperty(CLEANUP_FOLDER_PROP, folder.getId());
-  props.setProperty(CLEANUP_DELETED_PROP, '0');
-  // Триггер с периодом 1 минута; запуск не гарантирован точно по минутам.
-  ScriptApp.newTrigger('cleanupExpiredFiles')
-    .timeBased().everyMinutes(1).create();
-  Logger.log('Test folder: ' + folder.getUrl());
+  const exists = ScriptApp.getProjectTriggers()
+    .some(t => t.getHandlerFunction() === 'cleanupExpiredFiles');
+  if (!exists) {
+    ScriptApp.newTrigger('cleanupExpiredFiles').timeBased().everyMinutes(1).create();
+  }
+  Logger.log('Test folder: ' + folder.getUrl() + '; trigger installed: true');
   return folder.getUrl();
 }
 
