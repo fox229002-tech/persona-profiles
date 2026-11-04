@@ -332,7 +332,6 @@ def process_payment(plan_key: str, amount: int) -> bool:
 
 
 # ---------- интерфейс ----------
-# ---------- оформление и навигация ----------
 ASSETS = Path(__file__).parent / "assets"
 style_file = ASSETS / "site.css"
 if style_file.exists():
@@ -341,40 +340,39 @@ if style_file.exists():
 def show_art(filename, width=None):
     path = ASSETS / filename
     if path.exists():
-        if width is None:
-            st.image(str(path))
-        else:
-            st.image(str(path), width=width)
+        st.image(str(path), width=width)
+
+def navigate(step):
+    st.session_state.research_step = step
+    st.rerun()
 
 if st.query_params.get("view") == "research":
     st.session_state.site_page = "Исследование"
+    st.session_state.research_step = "choose"
     st.query_params.clear()
 
 page = st.session_state.get("site_page", "Главная")
-if page == "Исследование":
-    if st.button("← На главную", key="back_home"):
-        st.session_state.site_page = "Главная"
-        st.rerun()
-
 if page == "Главная":
     from landing import render_landing
     render_landing(PRICE_PROFILE, PRICE_FULL)
     st.stop()
 
+if st.button("← На главную", key="back_home"):
+    st.session_state.site_page = "Главная"
+    st.rerun()
+
 pwd = st.secrets.get("APP_PASSWORD")
-if pwd:
-    if not st.session_state.get("authenticated", False):
-        st.markdown("### Вход в тестовую версию")
-        with st.form("password_form"):
-            entered_password = st.text_input("Пароль доступа", type="password")
-            submitted = st.form_submit_button("Войти", type="primary")
-        if submitted:
-            if hmac.compare_digest(entered_password, str(pwd)):
-                st.session_state.authenticated = True
-                st.rerun()
-            else:
-                st.error("Неверный пароль")
-        st.stop()
+if pwd and not st.session_state.get("authenticated", False):
+    st.markdown("### Вход в тестовую версию")
+    with st.form("password_form"):
+        entered_password = st.text_input("Пароль доступа", type="password")
+        submitted = st.form_submit_button("Войти", type="primary")
+    if submitted:
+        if hmac.compare_digest(entered_password, str(pwd)):
+            st.session_state.authenticated = True
+            st.rerun()
+        st.error("Неверный пароль")
+    st.stop()
 
 st.title("Исследование себя через образы")
 st.caption(
@@ -382,11 +380,63 @@ st.caption(
     "Это не диагностика и не медицинская информация."
 )
 
-tab_profile, tab_compat = st.tabs(["Мой профиль", "Совместимость"])
+step = st.session_state.get("research_step", "choose")
+plan = st.session_state.get("paid_plan")
 
-# ---- вкладка 1: профиль ----
-with tab_profile:
-    st.markdown("### Ваши образы")
+if step == "choose":
+    st.subheader("Выберите программу исследования")
+    st.write("Начните с исследования своего профиля или изучите совместимость двух профилей. "
+             "После оплаты мы последовательно проведём вас через все этапы.")
+    c1, c2 = st.columns(2)
+    with c1:
+        show_art("woman.svg", width=180)
+        st.markdown(f"### Профиль — {PRICE_PROFILE} ₽")
+        st.write(PLANS["profile"]["desc"])
+        if st.button("Выбрать «Профиль»", use_container_width=True):
+            st.session_state.checkout_plan = "profile"
+            navigate("checkout")
+    with c2:
+        show_art("couple.svg", width=180)
+        st.markdown(f"### Профиль + совместимость — {PRICE_FULL} ₽")
+        st.write(PLANS["full"]["desc"])
+        if st.button("Выбрать «Профиль + совместимость»", use_container_width=True):
+            st.session_state.checkout_plan = "full"
+            navigate("checkout")
+
+elif step == "checkout":
+    choice = st.session_state.get("checkout_plan", "profile")
+    st.subheader("Оформление заказа")
+    st.write(f"Выбранная программа: **{PLANS[choice]['label']}**")
+    if choice == "full":
+        st.warning(
+            "Исследование «Профиль + совместимость» целесообразно, если у вас уже "
+            "есть один готовый профиль. Для анализа совместимости нужны два профиля."
+        )
+        has_profile = st.checkbox("У меня есть готовый профиль", key="has_ready_profile")
+    else:
+        has_profile = True
+    st.info("Сейчас доступен демонстрационный режим: оплата имитируется, деньги не списываются.")
+    if st.button(f"Оплатить {PLANS[choice]['price']} ₽ и начать исследование",
+                 disabled=not has_profile):
+        try:
+            process_payment(choice, PLANS[choice]["price"])
+            st.session_state.paid_plan = choice
+            st.session_state.pop("profiles", None)
+            st.session_state.pop("result", None)
+            st.session_state.pop("profile_text", None)
+            st.session_state.pop("compat", None)
+            st.session_state.pop("compat_text", None)
+            for key in list(st.session_state):
+                if str(key).startswith("pick_"):
+                    del st.session_state[key]
+            navigate("characters")
+        except (JournalError, ValueError, KeyError) as exc:
+            st.error(f"Не удалось зарегистрировать заказ: {exc}. Попробуйте ещё раз.")
+    if st.button("← К выбору программы"):
+        navigate("choose")
+
+elif step == "characters":
+    st.subheader("Шаг 1 из 3. Ваши образы")
     a_art, b_art = st.columns(2)
     with a_art:
         show_art("woman.svg")
@@ -395,91 +445,67 @@ with tab_profile:
     st.info(
         "Введите 1–3 персонажей фильмов, книг или публичных людей, с которыми вы себя ассоциируете. "
         "Если персонаж малоизвестен, укажите в скобках, кто это (откуда он, кем является), "
-        "без описания характера. "
-        "Пример: Гоша (герой фильма «Москва слезам не верит»), "
-        "Харли Квинн, Дональд Трамп"
+        "без описания характера. Пример: Гоша (герой фильма «Москва слезам не верит»), "
+        "Харли Квинн, Дональд Трамп."
     )
-
-    characters = st.text_input("Персонажи")
-
-    if st.button("Создать описания", disabled=not characters.strip()):
+    characters = st.text_input("Персонажи", key="research_characters")
+    if st.button("Продолжить", disabled=not characters.strip()):
         with st.spinner("Создаю описания..."):
             try:
                 st.session_state.profiles = generate_profiles(characters)
-                st.session_state.pop("result", None)
-                st.session_state.pop("profile_text", None)
-                st.session_state.pop("profile_display_logged", None)
-                for k in [k for k in st.session_state if str(k).startswith("pick_")]:
-                    del st.session_state[k]
-            except Exception as e:
-                st.error(f"Не получилось: {e}")
+                for key in list(st.session_state):
+                    if str(key).startswith("pick_"):
+                        del st.session_state[key]
+                navigate("descriptions")
+            except Exception as exc:
+                st.error(f"Не получилось создать описания: {exc}. Введённые персонажи сохранены.")
 
+elif step == "descriptions":
     profiles = st.session_state.get("profiles")
-    if profiles:
-        st.markdown("Отметьте галочкой **любые** описания, которые вам подходят: одно, два или все.")
+    if not profiles:
+        st.warning("Сначала введите персонажей.")
+        if st.button("Перейти к вводу персонажей"):
+            navigate("characters")
+    else:
+        st.subheader("Шаг 2 из 3. Выберите подходящие описания")
+        st.info("Прочитайте все описания и отметьте «Это про меня» у одного или нескольких подходящих.")
         for i, p in enumerate(profiles):
-            with st.expander(f"📄 Профиль {i + 1}", expanded=True):
+            st.markdown(f"### Профиль {i + 1}")
+            left, right = st.columns(2)
+            with left:
                 st.markdown(f"**Психологический портрет**\n\n{p.get('portrait', '')}")
                 signs = "\n".join(f"- {s}" for s in p.get("signs", []))
                 st.markdown(f"**Как это проявляется в жизни**\n\n{signs}")
+            with right:
                 over = "\n".join(f"- {o}" for o in p.get("overload", []))
                 st.markdown(f"**Точки перегрузки**\n\n{over}")
                 st.markdown(f"**Стратегия адаптации**\n\n{p.get('adaptation', '')}")
-                st.checkbox("✅ Это про меня", key=f"pick_{i}")
-
+            st.checkbox("Это про меня", key=f"pick_{i}")
+            st.divider()
         chosen = [p for i, p in enumerate(profiles) if st.session_state.get(f"pick_{i}")]
-        paid_plan = st.session_state.get("paid_plan")
-
-        def run_analysis():
-            journal_event("ai_request", operation="profile")
-            st.session_state.result = analyze(chosen)
-            st.session_state.profile_text = build_profile_text(chosen, st.session_state.result)
-            journal_result(st.session_state.result, "profile")
-
-        if paid_plan is None:
-            st.markdown("### Выберите вариант")
-            keys = list(PLANS)
-            choice = st.radio(
-                "Что вы хотите получить?",
-                keys,
-                format_func=lambda k: PLANS[k]["label"],
-                captions=[PLANS[k]["desc"] for k in keys],
-                key="plan_choice",
-            )
-            if not chosen:
-                st.caption("Сначала отметьте подходящие описания выше.")
-            if st.button(f"💳 Оплатить {PLANS[choice]['price']} {CURRENCY} и получить разбор",
-                         disabled=not chosen):
+        if st.button("Продолжить", disabled=not chosen):
+            with st.spinner("Готовлю ваш результат..."):
                 try:
-                    payment_ok = process_payment(choice, PLANS[choice]["price"])
-                except (JournalError, ValueError, KeyError) as e:
-                    st.error(f"Не удалось зарегистрировать заказ: {e}")
-                    payment_ok = False
-                if payment_ok:
-                    st.session_state.paid_plan = choice  # оплата не списывается повторно при ошибке
-                    ok = False
-                    with st.spinner("Анализирую..."):
-                        try:
-                            run_analysis()
-                            ok = True
-                        except Exception as e:
-                            st.error(f"Не получилось: {e}")
-                    if ok:
-                        st.rerun()
-                else:
-                    st.error("Оплата не прошла. Попробуйте ещё раз.")
-            st.caption("🧪 Демо-режим: оплата имитируется, деньги не списываются.")
-        else:
-            st.success(f"Ваш вариант: {PLANS[paid_plan]['label']} (оплачено, демо)")
-            if st.button("Получить рекомендации", disabled=not chosen):
-                with st.spinner("Анализирую..."):
+                    journal_event("ai_request", operation="profile")
+                    result = analyze(chosen)
+                    st.session_state.result = result
+                    st.session_state.profile_text = build_profile_text(chosen, result)
                     try:
-                        run_analysis()
-                    except Exception as e:
-                        st.error(f"Не получилось: {e}")
+                        journal_result(result, "profile")
+                    except Exception as journal_exc:
+                        st.warning(f"Результат готов, но журнал не обновился: {journal_exc}")
+                    st.session_state.pop("profile_display_logged", None)
+                    navigate("profile_result")
+                except Exception as exc:
+                    st.error(f"Не удалось подготовить результат: {exc}. Выбранные описания сохранены.")
 
-    if st.session_state.get("result"):
-        st.subheader("🧠 Рекомендации")
+elif step == "profile_result":
+    if not st.session_state.get("result"):
+        st.warning("Результат пока не готов.")
+        if st.button("Вернуться к описаниям"):
+            navigate("descriptions")
+    else:
+        st.subheader("Шаг 3 из 3. Ваш профиль")
         st.markdown(st.session_state.result)
         if not st.session_state.get("profile_display_logged"):
             try:
@@ -487,105 +513,97 @@ with tab_profile:
                 if manager and st.session_state.get("order_id"):
                     manager.update_order(st.session_state.order_id, result_displayed=True)
                     journal_event("result_displayed", operation="profile")
-                    st.session_state.profile_display_logged = True
-            except Exception as e:
-                st.warning(f"Журнал: {e}")
-        if st.download_button(
-            "⬇️ Скачать мой профиль (.txt)",
-            st.session_state.profile_text,
-            file_name="psychoprofile.txt",
-            help="Файл можно загрузить во вкладке «Совместимость».",
-        ):
+                st.session_state.profile_display_logged = True
+            except Exception as exc:
+                st.warning(f"Журнал: {exc}")
+        if st.download_button("⬇️ Скачать мой профиль (.txt)", st.session_state.profile_text,
+                              file_name="psychoprofile.txt"):
             try:
                 journal_event("download_clicked", operation="profile")
-            except Exception as e:
-                st.warning(f"Журнал: {e}")
-
-# ---- вкладка 2: совместимость ----
-with tab_compat:
-    st.markdown("### Два профиля — одна история взаимодействия")
-    show_art("couple.svg")
-    plan_now = st.session_state.get("paid_plan")
-    if plan_now != "full":
-        st.warning("🔒 Разбор совместимости входит в вариант «Профиль + совместимость».")
-        if plan_now == "profile":
-            extra = PRICE_FULL - PRICE_PROFILE
-            label = f"💳 Добавить совместимость за {extra} {CURRENCY}"
-            amount = extra
+            except Exception as exc:
+                st.warning(f"Журнал: {exc}")
+        if plan == "full":
+            st.write("Ваш профиль готов. Теперь можно перейти к исследованию совместимости.")
+            if st.button("Продолжить тестирование", type="primary"):
+                navigate("compat_input")
         else:
-            label = f"💳 Открыть «Профиль + совместимость» за {PRICE_FULL} {CURRENCY}"
-            amount = PRICE_FULL
-        if st.button(label):
-            try:
-                payment_ok = process_payment("full", amount)
-            except (JournalError, ValueError, KeyError) as e:
-                st.error(f"Не удалось зарегистрировать заказ: {e}")
-                payment_ok = False
-            if payment_ok:
-                st.session_state.paid_plan = "full"
-                st.rerun()
-            else:
-                st.error("Оплата не прошла. Попробуйте ещё раз.")
-        st.caption("🧪 Демо-режим: оплата имитируется, деньги не списываются.")
-    else:
-        st.info(
-            "Загрузите два готовых профиля (файл .txt или .docx, скачанный во вкладке «Мой профиль») "
-            "или вставьте текст, чтобы увидеть сочетание, возможные трения и способы с ними справляться."
-        )
-        relation = st.selectbox("Тип отношений", RELATION_TYPES)
+            st.markdown("### Продолжить исследование вместе с партнёром")
+            st.write("Пригласите партнёра пройти исследование профиля, затем вы сможете "
+                     "изучить вашу совместимость по программе «Профиль + совместимость».")
+            if st.button("Начать новое исследование «Профиль + совместимость»"):
+                st.session_state.checkout_plan = "full"
+                navigate("checkout")
 
+elif step == "compat_input":
+    if plan != "full":
+        st.warning("Исследование совместимости доступно по комплексному тарифу.")
+        if st.button("Выбрать программу"):
+            navigate("choose")
+    else:
+        st.subheader("Два профиля — одна история взаимодействия")
+        show_art("couple.svg")
+        st.info("Загрузите два готовых профиля (.txt или .docx) или вставьте текст. "
+                "Можно использовать профиль, полученный на предыдущем этапе.")
+        relation = st.selectbox("Тип отношений", RELATION_TYPES, key="compat_relation")
         texts, names = [], []
         for key, default in (("a", "Человек А"), ("b", "Человек Б")):
             st.markdown(f"#### {default}")
             names.append(st.text_input("Имя или подпись", value=default, key=f"name_{key}"))
-            text = ""
+            profile_text = ""
             if key == "a" and st.session_state.get("profile_text"):
-                if st.checkbox("Взять мой профиль из вкладки «Мой профиль»", key="use_mine"):
-                    text = st.session_state.profile_text
-            if not text:
-                up = st.file_uploader("Файл профиля", type=["txt", "docx"], key=f"file_{key}")
-                if up is not None:
+                if st.checkbox("Взять мой профиль из исследования «Профиль»", key="use_mine"):
+                    profile_text = st.session_state.profile_text
+            if not profile_text:
+                upload = st.file_uploader("Файл профиля", type=["txt", "docx"], key=f"file_{key}")
+                if upload is not None:
                     try:
-                        text = read_profile_file(up)
-                    except Exception as e:
-                        st.error(f"Не удалось прочитать файл: {e}")
-            if not text:
-                text = st.text_area("Или вставьте текст профиля", key=f"text_{key}", height=150)
-            texts.append(text.strip())
-
+                        profile_text = read_profile_file(upload)
+                    except Exception as exc:
+                        st.error(f"Не удалось прочитать файл: {exc}")
+            if not profile_text:
+                profile_text = st.text_area("Или вставьте текст профиля", key=f"text_{key}", height=150)
+            texts.append(profile_text.strip())
         ready = all(len(t) > 50 for t in texts)
         if st.button("Проверить совместимость", disabled=not ready):
             with st.spinner("Анализирую сочетание..."):
                 try:
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
                     journal_event("ai_request", operation="compatibility")
-                    st.session_state.pop("compat_display_logged", None)
-                    st.session_state.compat = analyze_compatibility(texts[0], texts[1], na, nb, relation)
-                    journal_result(st.session_state.compat, "compatibility")
+                    result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
+                    st.session_state.compat = result
                     st.session_state.compat_text = (
-                        f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{st.session_state.compat}"
+                        f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
                     )
-                except Exception as e:
-                    st.error(f"Не получилось: {e}")
+                    try:
+                        journal_result(result, "compatibility")
+                    except Exception as journal_exc:
+                        st.warning(f"Результат готов, но журнал не обновился: {journal_exc}")
+                    st.session_state.pop("compat_display_logged", None)
+                    navigate("compat_result")
+                except Exception as exc:
+                    st.error(f"Не получилось: {exc}. Введённые данные сохранены.")
 
-        if st.session_state.get("compat"):
-            st.subheader("💞 Разбор совместимости")
-            st.markdown(st.session_state.compat)
-            if not st.session_state.get("compat_display_logged"):
-                try:
-                    manager = journal()
-                    if manager and st.session_state.get("order_id"):
-                        manager.update_order(st.session_state.order_id, result_displayed=True)
+elif step == "compat_result":
+    if not st.session_state.get("compat"):
+        st.warning("Результат совместимости пока не готов.")
+        if st.button("Вернуться к вводу данных"):
+            navigate("compat_input")
+    else:
+        st.subheader("💞 Разбор совместимости")
+        st.markdown(st.session_state.compat)
+        if not st.session_state.get("compat_display_logged"):
+            try:
+                manager = journal()
+                if manager and st.session_state.get("order_id"):
+                    manager.update_order(st.session_state.order_id, result_displayed=True)
                     journal_event("result_displayed", operation="compatibility")
-                    st.session_state.compat_display_logged = True
-                except Exception as e:
-                    st.warning(f"Журнал: {e}")
-            if st.download_button(
-                "⬇️ Скачать разбор совместимости (.txt)",
-                st.session_state.get("compat_text", st.session_state.compat),
-                file_name="compatibility.txt",
-            ):
-                try:
-                    journal_event("download_clicked", operation="compatibility")
-                except Exception as e:
-                    st.warning(f"Журнал: {e}")
+                st.session_state.compat_display_logged = True
+            except Exception as exc:
+                st.warning(f"Журнал: {exc}")
+        if st.download_button("⬇️ Скачать разбор совместимости (.txt)",
+                              st.session_state.get("compat_text", st.session_state.compat),
+                              file_name="compatibility.txt"):
+            try:
+                journal_event("download_clicked", operation="compatibility")
+            except Exception as exc:
+                st.warning(f"Журнал: {exc}")
