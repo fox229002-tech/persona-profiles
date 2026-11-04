@@ -604,7 +604,7 @@ elif step == "compat_input":
                     journal_event("ai_request", operation="compatibility")
                     result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
                     download_text = (
-                        f"РАЗБОР СОВМЕСТИМОСТИ\\n{na} и {nb} ({relation})\\n\\n{result}"
+                        f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
                     )
                     journal_result(result, "compatibility", download_text)
                     st.session_state.compat = result
