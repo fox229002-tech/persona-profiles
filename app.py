@@ -8,6 +8,7 @@ from pathlib import Path
 
 import requests
 import streamlit as st
+from order_manager import OrderManager, JournalError
 
 st.set_page_config(page_title="Образы — исследование себя", page_icon="🌿", layout="wide")
 
@@ -295,9 +296,38 @@ PLANS = {
 }
 
 
+def journal():
+    """Журнал включается только после настройки Google Sheets Secrets."""
+    if "google_sheets" not in st.secrets:
+        return None
+    return OrderManager.from_streamlit_secrets()
+
+
+def journal_event(event_type, *, result=None, operation="", status="ok"):
+    manager = journal()
+    order_id = st.session_state.get("order_id")
+    if manager and order_id:
+        manager.log_event(order_id, event_type, operation=operation,
+                          status=status, result=result)
+
+
+def journal_result(result, operation):
+    manager = journal()
+    order_id = st.session_state.get("order_id")
+    if manager and order_id:
+        manager.update_order(order_id, result=result, service_status="completed")
+        journal_event("ai_response", result=result, operation=operation)
+
+
 def process_payment(plan_key: str, amount: int) -> bool:
     """ЗАГЛУШКА. Здесь подключается реальная оплата (ЮKassa, Stripe и т.п.):
     создать платёж на сумму amount, дождаться подтверждения и вернуть True/False."""
+    manager = journal()
+    if manager:
+        # При ошибке журнала оплату не запускаем.
+        order_id = manager.create_order(plan_key, amount)
+        st.session_state.order_id = order_id
+        manager.log_event(order_id, "payment_demo", operation=plan_key, status="simulated")
     return True
 
 
@@ -378,6 +408,7 @@ with tab_profile:
                 st.session_state.profiles = generate_profiles(characters)
                 st.session_state.pop("result", None)
                 st.session_state.pop("profile_text", None)
+                st.session_state.pop("profile_display_logged", None)
                 for k in [k for k in st.session_state if str(k).startswith("pick_")]:
                     del st.session_state[k]
             except Exception as e:
@@ -400,8 +431,10 @@ with tab_profile:
         paid_plan = st.session_state.get("paid_plan")
 
         def run_analysis():
+            journal_event("ai_request", operation="profile")
             st.session_state.result = analyze(chosen)
             st.session_state.profile_text = build_profile_text(chosen, st.session_state.result)
+            journal_result(st.session_state.result, "profile")
 
         if paid_plan is None:
             st.markdown("### Выберите вариант")
@@ -417,7 +450,12 @@ with tab_profile:
                 st.caption("Сначала отметьте подходящие описания выше.")
             if st.button(f"💳 Оплатить {PLANS[choice]['price']} {CURRENCY} и получить разбор",
                          disabled=not chosen):
-                if process_payment(choice, PLANS[choice]["price"]):
+                try:
+                    payment_ok = process_payment(choice, PLANS[choice]["price"])
+                except (JournalError, ValueError, KeyError) as e:
+                    st.error(f"Не удалось зарегистрировать заказ: {e}")
+                    payment_ok = False
+                if payment_ok:
                     st.session_state.paid_plan = choice  # оплата не списывается повторно при ошибке
                     ok = False
                     with st.spinner("Анализирую..."):
@@ -443,12 +481,25 @@ with tab_profile:
     if st.session_state.get("result"):
         st.subheader("🧠 Рекомендации")
         st.markdown(st.session_state.result)
-        st.download_button(
+        if not st.session_state.get("profile_display_logged"):
+            try:
+                manager = journal()
+                if manager and st.session_state.get("order_id"):
+                    manager.update_order(st.session_state.order_id, result_displayed=True)
+                    journal_event("result_displayed", operation="profile")
+                    st.session_state.profile_display_logged = True
+            except Exception as e:
+                st.warning(f"Журнал: {e}")
+        if st.download_button(
             "⬇️ Скачать мой профиль (.txt)",
             st.session_state.profile_text,
             file_name="psychoprofile.txt",
             help="Файл можно загрузить во вкладке «Совместимость».",
-        )
+        ):
+            try:
+                journal_event("download_clicked", operation="profile")
+            except Exception as e:
+                st.warning(f"Журнал: {e}")
 
 # ---- вкладка 2: совместимость ----
 with tab_compat:
@@ -465,7 +516,12 @@ with tab_compat:
             label = f"💳 Открыть «Профиль + совместимость» за {PRICE_FULL} {CURRENCY}"
             amount = PRICE_FULL
         if st.button(label):
-            if process_payment("full", amount):
+            try:
+                payment_ok = process_payment("full", amount)
+            except (JournalError, ValueError, KeyError) as e:
+                st.error(f"Не удалось зарегистрировать заказ: {e}")
+                payment_ok = False
+            if payment_ok:
                 st.session_state.paid_plan = "full"
                 st.rerun()
             else:
@@ -502,7 +558,10 @@ with tab_compat:
             with st.spinner("Анализирую сочетание..."):
                 try:
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
+                    journal_event("ai_request", operation="compatibility")
+                    st.session_state.pop("compat_display_logged", None)
                     st.session_state.compat = analyze_compatibility(texts[0], texts[1], na, nb, relation)
+                    journal_result(st.session_state.compat, "compatibility")
                     st.session_state.compat_text = (
                         f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{st.session_state.compat}"
                     )
@@ -512,8 +571,18 @@ with tab_compat:
         if st.session_state.get("compat"):
             st.subheader("💞 Разбор совместимости")
             st.markdown(st.session_state.compat)
-            st.download_button(
+            if not st.session_state.get("compat_display_logged"):
+                try:
+                    journal_event("result_displayed", operation="compatibility")
+                    st.session_state.compat_display_logged = True
+                except Exception as e:
+                    st.warning(f"Журнал: {e}")
+            if st.download_button(
                 "⬇️ Скачать разбор совместимости (.txt)",
                 st.session_state.get("compat_text", st.session_state.compat),
                 file_name="compatibility.txt",
-            )
+            ):
+                try:
+                    journal_event("download_clicked", operation="compatibility")
+                except Exception as e:
+                    st.warning(f"Журнал: {e}")
