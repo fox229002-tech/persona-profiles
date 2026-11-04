@@ -401,6 +401,10 @@ if pwd and not st.session_state.get("authenticated", False):
         st.error("Неверный пароль")
     st.stop()
 
+if st.secrets.get("TEST_FAILURE_MODE", False) and st.secrets.get("APP_PASSWORD") and st.session_state.get("authenticated", False):
+    with st.expander("Journal fault testing"):
+        st.selectbox("Simulated failure", ["none", "create_order", "log_event", "update_order", "all"], key="journal_test_failure")
+
 st.title("Исследование себя через образы")
 st.caption(
     "Образы создаёт ИИ как метафорические психотипы, а не историческая справка. "
