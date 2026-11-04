@@ -401,7 +401,7 @@ if pwd and not st.session_state.get("authenticated", False):
         st.error("Неверный пароль")
     st.stop()
 
-if st.secrets.get("TEST_FAILURE_MODE", False) and st.secrets.get("APP_PASSWORD") and st.session_state.get("authenticated", False):
+if st.secrets.get("TEST_FAILURE_MODE", False):
     with st.expander("Journal fault testing"):
         st.selectbox("Simulated failure", ["none", "create_order", "log_event", "update_order", "all"], key="journal_test_failure")
 
