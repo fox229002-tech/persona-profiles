@@ -103,3 +103,54 @@ function cleanupStatus() {
   Logger.log(JSON.stringify(result));
   return result;
 }
+
+/**
+ * Временное хранилище: только зашифрованные данные.
+ * Вызов ТОЛЬКО из авторизованного run(p) в Код.gs; не публиковать
+ * отдельный незащищённый endpoint.
+ * recovery_hash = SHA-256 секретного токена, полученного в Streamlit.
+ * payload = Fernet-токен (шифрование в Streamlit, ключ на сервере Streamlit).
+ */
+function temporaryResult_(p) {
+  const action = String(p.action || '');
+  const order = checkCode(p.order_id);
+  const kind = checkCode(p.operation);
+  if (!['profile','compatibility'].includes(kind)) throw Error('invalid_operation');
+  const accessHash = String(p.recovery_hash || '');
+  if (!/^[a-f0-9]{64}$/.test(accessHash)) throw Error('invalid_recovery_hash');
+  const folder = cleanupFolder_();
+  const now = Date.now();
+  const prefix = CLEANUP_PREFIX;
+  // Имя содержит только код заказа, тип результата и случайный UUID.
+  const files = folder.getFiles();
+  let matchFile = null, matchExpiry = 0;
+  while (files.hasNext()) {
+    const f = files.next();
+    const match = /^OBR_TMP_(\\d{13})_([A-Za-z0-9-]+)_(profile|compatibility)_([a-f0-9-]{36})\\.txt$/i.exec(f.getName());
+    if (!match || match[2] !== order || match[3] !== kind) continue;
+    if (matchFile) throw Error('duplicate_result_files');
+    matchFile = f; matchExpiry = Number(match[1]);
+  }
+  if (action === 'temp_save') {
+    if (matchFile) throw Error('result_already_exists');
+    const orderSheet = sheet('Заказы');
+    const row = findRow(orderSheet, order);
+    if (!row) throw Error('order_not_found');
+    const orderData = orderSheet.getRange(row, 1, 1, 12).getValues()[0];
+    if (String(orderData[8]) !== 'completed') throw Error('order_not_completed');
+    const payload = String(p.ciphertext || '');
+    if (!/^[A-Za-z0-9_=-]{40,250000}$/.test(payload)) throw Error('invalid_ciphertext');
+    const expiry = now + CLEANUP_TEST_TTL_MS;
+    const filename = prefix + expiry + '_' + order + '_' + kind + '_' + Utilities.getUuid() + '.txt';
+    const file = folder.createFile(filename, JSON.stringify({accessHash, payload}), MimeType.PLAIN_TEXT);
+    return {ok:true,expires_at_ms:expiry};
+  }
+  if (action === 'temp_get') {
+    if (!matchFile || now >= matchExpiry) return {ok:true,status:'expired'};
+    const data = JSON.parse(matchFile.getBlob().getDataAsString('UTF-8'));
+    // Проверяем хеш без раскрытия содержимого файла.
+    if (data.accessHash !== accessHash) throw Error('access_denied');
+    return {ok:true,status:'available',ciphertext:data.payload,expires_at_ms:matchExpiry};
+  }
+  throw Error('unknown_temporary_action');
+}
