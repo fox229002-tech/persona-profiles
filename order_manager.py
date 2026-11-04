@@ -38,7 +38,7 @@ class OrderManager:
         import streamlit as st
         cfg = st.secrets["order_journal"]
         failure = None
-        if st.secrets.get("TEST_FAILURE_MODE", False) and st.secrets.get("APP_PASSWORD") and st.session_state.get("authenticated", False):
+        if st.secrets.get("TEST_FAILURE_MODE", False):
             failure = st.session_state.get("journal_test_failure", "none")
         return cls(str(cfg["script_url"]), str(cfg["token"]), test_failure=failure)
 
