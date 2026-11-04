@@ -37,6 +37,9 @@ function rowObject(headers, row) {
 }
 function run(p) {
   const action = checkCode(p.action);
+  if (action === 'temp_save' || action === 'temp_get') {
+    return temporaryResult_(p);
+  }
   if (action === 'create_order') {
     const id=checkCode(p.order_id), tariff=checkCode(p.tariff);
     if (!Number.isInteger(p.amount_rub) || p.amount_rub<0) throw Error('invalid_amount');
