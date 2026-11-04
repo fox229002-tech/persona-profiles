@@ -8,8 +8,8 @@
  * Токен не добавлять в URL и не публиковать в GitHub.
  */
 const SHEET_ID = '1Efm4TXFbsv9T6dVjHYmGDRDcYzKCcJIZbiGqFhVfXYA';
-const ORDER_HEADERS = ['order_id','created_at_utc','tariff','amount_rub','currency','payment_id','payment_status','paid_at_utc','service_status','result_sha256','result_displayed_at_utc','updated_at_utc'];
-const EVENT_HEADERS = ['event_id','order_id','event_at_utc','event_type','operation','status','result_sha256','details_code'];
+const ORDER_HEADERS = ['order_id','created_at_msk','tariff','amount_rub','currency','payment_id','payment_status','paid_at_msk','service_status','result_sha256','result_displayed_at_msk','updated_at_msk'];
+const EVENT_HEADERS = ['event_id','order_id','event_at_msk','event_type','operation','status','result_sha256','details_code'];
 const CODE = /^[A-Za-z0-9_.:-]{1,100}$/;
 function output(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
@@ -19,7 +19,7 @@ function checkCode(v, optional) {
   if (typeof v !== 'string' || !CODE.test(v)) throw Error('invalid_code');
   return v;
 }
-function utc() { return new Date().toISOString(); }
+function msk() { return Utilities.formatDate(new Date(), 'Europe/Moscow', 'dd.MM.yyyy HH:mm:ss'); }
 function sheet(name) {
   const s = SpreadsheetApp.openById(SHEET_ID).getSheetByName(name);
   if (!s) throw Error('sheet_missing');
@@ -42,7 +42,7 @@ function run(p) {
     if (!Number.isInteger(p.amount_rub) || p.amount_rub<0) throw Error('invalid_amount');
     const s=sheet('Заказы');
     if (findRow(s,id)) return {ok:true,order_id:id};
-    const t=utc();
+    const t=msk();
     s.appendRow([id,t,tariff,p.amount_rub,'RUB','','created','','pending','','',t]);
     return {ok:true,order_id:id};
   }
@@ -53,7 +53,7 @@ function run(p) {
     const details=checkCode(p.details_code,true);
     const s=sheet('События');
     if (findRow(s,id)) return {ok:true,event_id:id};
-    s.appendRow([id,order,utc(),type,op,status,hash,details]);
+    s.appendRow([id,order,msk(),type,op,status,hash,details]);
     return {ok:true,event_id:id};
   }
   if (action === 'get_order' || action === 'get_events') {
@@ -74,15 +74,15 @@ function run(p) {
     if (p.payment_status !== undefined) {
       if (!['created','pending','paid','failed','refunded'].includes(p.payment_status)) throw Error('invalid_payment_status');
       v[6]=p.payment_status;
-      if (p.payment_status==='paid' && !v[7]) v[7]=utc();
+      if (p.payment_status==='paid' && !v[7]) v[7]=msk();
     }
     if (p.service_status !== undefined) {
       if (!['pending','processing','completed','failed'].includes(p.service_status)) throw Error('invalid_service_status');
       v[8]=p.service_status;
     }
     if (p.result_sha256 !== undefined) v[9]=checkCode(p.result_sha256);
-    if (p.result_displayed && !v[10]) v[10]=utc();
-    v[11]=utc();
+    if (p.result_displayed && !v[10]) v[10]=msk();
+    v[11]=msk();
     s.getRange(r,1,1,12).setValues([v]);
     return {ok:true};
   }
