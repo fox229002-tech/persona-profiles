@@ -514,9 +514,15 @@ elif step == "descriptions":
             with st.spinner("Готовлю ваш результат..."):
                 try:
                     journal_event("ai_request", operation="profile")
-                    result = analyze(chosen)
-                    download_text = build_profile_text(chosen, result)
+                    pending = st.session_state.get("pending_profile_result")
+                    if pending is None:
+                        result = analyze(chosen)
+                        download_text = build_profile_text(chosen, result)
+                        st.session_state.pending_profile_result = (result, download_text)
+                    else:
+                        result, download_text = pending
                     journal_result(result, "profile", download_text)
+                    st.session_state.pop("pending_profile_result", None)
                     st.session_state.result = result
                     st.session_state.profile_text = download_text
                     st.session_state.profile_download_clicked = False
@@ -602,11 +608,17 @@ elif step == "compat_input":
                 try:
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
                     journal_event("ai_request", operation="compatibility")
-                    result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
-                    download_text = (
-                        f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
-                    )
+                    pending = st.session_state.get("pending_compat_result")
+                    if pending is None:
+                        result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
+                        download_text = (
+                            f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
+                        )
+                        st.session_state.pending_compat_result = (result, download_text)
+                    else:
+                        result, download_text = pending
                     journal_result(result, "compatibility", download_text)
+                    st.session_state.pop("pending_compat_result", None)
                     st.session_state.compat = result
                     st.session_state.compat_download_clicked = False
                     st.session_state.compat_text = download_text
