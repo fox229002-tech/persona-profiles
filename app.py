@@ -54,7 +54,7 @@ def ask_llm(prompt: str) -> str:
                     return "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
                 except requests.exceptions.Timeout:
                     last_err = f"таймаут ({model})"
-        raise RuntimeError(f"Gemini сейчас перегружен, попробуйте через минуту. Последняя ошибка: {last_err}")
+        raise RuntimeError("Сервер перегружен. Попробуйте через минуту.")
 
     if provider == "claude":
         r = requests.post(
