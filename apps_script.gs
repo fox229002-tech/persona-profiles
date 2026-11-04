@@ -1,0 +1,101 @@
+/**
+ * «Образы» — защищённый тестовый журнал заказов.
+ * Откройте Google Sheets -> Расширения -> Apps Script.
+ * Свойства проекта -> Свойства скрипта:
+ * JOURNAL_TOKEN = длинная случайная строка (та же, что в Streamlit Secrets).
+ * Развернуть -> Новое развертывание -> Веб-приложение:
+ * Выполнять от моего имени; доступ: Все (Anyone).
+ * Токен не добавлять в URL и не публиковать в GitHub.
+ */
+const SHEET_ID = '1Efm4TXFbsv9T6dVjHYmGDRDcYzKCcJIZbiGqFhVfXYA';
+const ORDER_HEADERS = ['order_id','created_at_utc','tariff','amount_rub','currency','payment_id','payment_status','paid_at_utc','service_status','result_sha256','result_displayed_at_utc','updated_at_utc'];
+const EVENT_HEADERS = ['event_id','order_id','event_at_utc','event_type','operation','status','result_sha256','details_code'];
+const CODE = /^[A-Za-z0-9_.:-]{1,100}$/;
+function output(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+function checkCode(v, optional) {
+  if (optional && (v === '' || v === undefined || v === null)) return '';
+  if (typeof v !== 'string' || !CODE.test(v)) throw Error('invalid_code');
+  return v;
+}
+function utc() { return new Date().toISOString(); }
+function sheet(name) {
+  const s = SpreadsheetApp.openById(SHEET_ID).getSheetByName(name);
+  if (!s) throw Error('sheet_missing');
+  return s;
+}
+function findRow(s, id) {
+  const last = s.getLastRow();
+  if (last < 2) return 0;
+  const ids = s.getRange(2,1,last-1,1).getValues();
+  for (let i=0;i<ids.length;i++) if (String(ids[i][0])===id) return i+2;
+  return 0;
+}
+function rowObject(headers, row) {
+  const o={}; headers.forEach((h,i)=>o[h]=String(row[i]??'')); return o;
+}
+function run(p) {
+  const action = checkCode(p.action);
+  if (action === 'create_order') {
+    const id=checkCode(p.order_id), tariff=checkCode(p.tariff);
+    if (!Number.isInteger(p.amount_rub) || p.amount_rub<0) throw Error('invalid_amount');
+    const s=sheet('Заказы');
+    if (findRow(s,id)) return {ok:true,order_id:id};
+    const t=utc();
+    s.appendRow([id,t,tariff,p.amount_rub,'RUB','','created','','pending','','',t]);
+    return {ok:true,order_id:id};
+  }
+  if (action === 'log_event') {
+    const id=checkCode(p.event_id), order=checkCode(p.order_id);
+    const type=checkCode(p.event_type), op=checkCode(p.operation,true);
+    const status=checkCode(p.status), hash=checkCode(p.result_sha256,true);
+    const details=checkCode(p.details_code,true);
+    const s=sheet('События');
+    if (findRow(s,id)) return {ok:true,event_id:id};
+    s.appendRow([id,order,utc(),type,op,status,hash,details]);
+    return {ok:true,event_id:id};
+  }
+  if (action === 'get_order' || action === 'get_events') {
+    const id=checkCode(p.order_id);
+    if (action==='get_order') {
+      const s=sheet('Заказы'), r=findRow(s,id);
+      return {ok:true,order:r?rowObject(ORDER_HEADERS,s.getRange(r,1,1,12).getValues()[0]):null};
+    }
+    const s=sheet('События'), last=s.getLastRow();
+    const rows=last<2?[]:s.getRange(2,1,last-1,8).getValues();
+    return {ok:true,events:rows.filter(r=>String(r[1])===id).map(r=>rowObject(EVENT_HEADERS,r))};
+  }
+  if (action === 'update_order') {
+    const id=checkCode(p.order_id), s=sheet('Заказы'), r=findRow(s,id);
+    if (!r) throw Error('order_not_found');
+    const v=s.getRange(r,1,1,12).getValues()[0];
+    if (p.payment_id !== undefined) v[5]=checkCode(p.payment_id);
+    if (p.payment_status !== undefined) {
+      if (!['created','pending','paid','failed','refunded'].includes(p.payment_status)) throw Error('invalid_payment_status');
+      v[6]=p.payment_status;
+      if (p.payment_status==='paid' && !v[7]) v[7]=utc();
+    }
+    if (p.service_status !== undefined) {
+      if (!['pending','processing','completed','failed'].includes(p.service_status)) throw Error('invalid_service_status');
+      v[8]=p.service_status;
+    }
+    if (p.result_sha256 !== undefined) v[9]=checkCode(p.result_sha256);
+    if (p.result_displayed && !v[10]) v[10]=utc();
+    v[11]=utc();
+    s.getRange(r,1,1,12).setValues([v]);
+    return {ok:true};
+  }
+  throw Error('unknown_action');
+}
+function doPost(e) {
+  try {
+    const p=JSON.parse(e.postData.contents);
+    const token=PropertiesService.getScriptProperties().getProperty('JOURNAL_TOKEN');
+    if (!token || typeof p.token!=='string' || p.token!==token) throw Error('unauthorized');
+    const lock=LockService.getScriptLock();
+    lock.waitLock(20000);
+    try { return output(run(p)); }
+    finally { lock.releaseLock(); }
+  } catch (err) { return output({ok:false,error:String(err.message||err)}); }
+}
