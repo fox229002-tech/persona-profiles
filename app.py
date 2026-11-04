@@ -498,6 +498,7 @@ elif step == "descriptions":
                     result = analyze(chosen)
                     st.session_state.result = result
                     st.session_state.profile_text = build_profile_text(chosen, result)
+                    st.session_state.profile_download_clicked = False
                     try:
                         journal_result(result, "profile")
                     except Exception as journal_exc:
@@ -526,19 +527,26 @@ elif step == "profile_result":
                 st.warning(f"Журнал: {exc}")
         if st.download_button("⬇️ Скачать мой профиль (.txt)", st.session_state.profile_text,
                               file_name="psychoprofile.txt"):
+            st.session_state.profile_download_clicked = True
             try:
                 journal_event("download_clicked", operation="profile")
             except Exception as exc:
                 st.warning(f"Журнал: {exc}")
         if plan == "full":
             st.write("Ваш профиль готов. Теперь можно перейти к исследованию совместимости.")
-            if st.button("Продолжить тестирование", type="primary"):
+            if not st.session_state.get("profile_download_clicked", False):
+                st.caption("Для продолжения сначала скачайте результат профиля.")
+            if st.button("Продолжить тестирование", type="primary",
+                         disabled=not st.session_state.get("profile_download_clicked", False)):
                 navigate("compat_input")
         else:
             st.markdown("### Продолжить исследование вместе с партнёром")
             st.write("Пригласите партнёра пройти исследование профиля, затем вы сможете "
                      "изучить вашу совместимость по программе «Профиль + совместимость».")
-            if st.button("Начать новое исследование «Профиль + совместимость»"):
+            if not st.session_state.get("profile_download_clicked", False):
+                st.caption("Для перехода сначала скачайте результат профиля.")
+            if st.button("Начать новое исследование «Профиль + совместимость»",
+                         disabled=not st.session_state.get("profile_download_clicked", False)):
                 st.session_state.checkout_plan = "full"
                 navigate("checkout")
 
@@ -579,6 +587,7 @@ elif step == "compat_input":
                     journal_event("ai_request", operation="compatibility")
                     result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
                     st.session_state.compat = result
+                    st.session_state.compat_download_clicked = False
                     st.session_state.compat_text = (
                         f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
                     )
@@ -611,6 +620,7 @@ elif step == "compat_result":
         if st.download_button("⬇️ Скачать разбор совместимости (.txt)",
                               st.session_state.get("compat_text", st.session_state.compat),
                               file_name="compatibility.txt"):
+            st.session_state.compat_download_clicked = True
             try:
                 journal_event("download_clicked", operation="compatibility")
             except Exception as exc:
