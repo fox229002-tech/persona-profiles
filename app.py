@@ -297,8 +297,8 @@ PLANS = {
 
 
 def journal():
-    """Журнал включается только после настройки Google Sheets Secrets."""
-    if "google_sheets" not in st.secrets:
+    """Журнал включается после настройки Apps Script в Secrets."""
+    if "order_journal" not in st.secrets:
         return None
     return OrderManager.from_streamlit_secrets()
 
