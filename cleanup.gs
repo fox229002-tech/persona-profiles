@@ -61,7 +61,7 @@ function cleanupExpiredFiles() {
   let removed = 0, active = 0, expired = 0, errors = 0;
   while (files.hasNext()) {
     const file = files.next();
-    const match = /^OBR_TMP_(\d{13})_[0-9a-f-]+\.txt$/i.exec(file.getName());
+    const match = /^OBR_TMP_(\d{13})_(?:[0-9a-f-]+|[A-Za-z0-9-]+_(?:profile|compatibility)_[0-9a-f-]+)\.txt$/i.exec(file.getName());
     if (!match) continue; // чужие файлы не трогаем
     if (Number(match[1]) > now) { active++; continue; }
     expired++;
@@ -91,7 +91,7 @@ function cleanupStatus() {
   let active = 0, expired = 0;
   while (files.hasNext()) {
     const name = files.next().getName();
-    const m = /^OBR_TMP_(\d{13})_[0-9a-f-]+\.txt$/i.exec(name);
+    const m = /^OBR_TMP_(\d{13})_(?:[0-9a-f-]+|[A-Za-z0-9-]+_(?:profile|compatibility)_[0-9a-f-]+)\.txt$/i.exec(name);
     if (!m) continue;
     if (Number(m[1]) <= now) expired++; else active++;
   }
@@ -126,7 +126,7 @@ function temporaryResult_(p) {
   let matchFile = null, matchExpiry = 0;
   while (files.hasNext()) {
     const f = files.next();
-    const match = /^OBR_TMP_(\\d{13})_([A-Za-z0-9-]+)_(profile|compatibility)_([a-f0-9-]{36})\\.txt$/i.exec(f.getName());
+    const match = /^OBR_TMP_(\d{13})_([A-Za-z0-9-]+)_(profile|compatibility)_([a-f0-9-]{36})\.txt$/i.exec(f.getName());
     if (!match || match[2] !== order || match[3] !== kind) continue;
     if (matchFile) throw Error('duplicate_result_files');
     matchFile = f; matchExpiry = Number(match[1]);
