@@ -61,7 +61,7 @@ function cleanupExpiredFiles() {
   let removed = 0, active = 0, expired = 0, errors = 0;
   while (files.hasNext()) {
     const file = files.next();
-    const match = /^OBR_TMP_(\d{13})_(?:[0-9a-f-]+|[A-Za-z0-9-]+_(?:profile|compatibility)_[0-9a-f-]+)\.txt$/i.exec(file.getName());
+    const match = /^OBR_TMP_(\d{13})_(?:[0-9a-f-]+|[A-Za-z0-9-]+_(?:profile|compatibility|checkpoint)_[0-9a-f-]+)\.txt$/i.exec(file.getName());
     if (!match) continue; // чужие файлы не трогаем
     if (Number(match[1]) > now) { active++; continue; }
     expired++;
@@ -91,7 +91,7 @@ function cleanupStatus() {
   let active = 0, expired = 0;
   while (files.hasNext()) {
     const name = files.next().getName();
-    const m = /^OBR_TMP_(\d{13})_(?:[0-9a-f-]+|[A-Za-z0-9-]+_(?:profile|compatibility)_[0-9a-f-]+)\.txt$/i.exec(name);
+    const m = /^OBR_TMP_(\d{13})_(?:[0-9a-f-]+|[A-Za-z0-9-]+_(?:profile|compatibility|checkpoint)_[0-9a-f-]+)\.txt$/i.exec(name);
     if (!m) continue;
     if (Number(m[1]) <= now) expired++; else active++;
   }
@@ -111,6 +111,42 @@ function cleanupStatus() {
  * recovery_hash = SHA-256 секретного токена, полученного в Streamlit.
  * payload = Fernet-токен (шифрование в Streamlit, ключ на сервере Streamlit).
  */
+/** Encrypted, authenticated, replaceable progress checkpoint per order. */
+function checkpoint_(p) {
+  const order = checkCode(p.order_id), accessHash = String(p.recovery_hash || '');
+  if (!/^[a-f0-9]{64}$/.test(accessHash)) throw Error('invalid_recovery_hash');
+  const orders = sheet('Заказы'), row = findRow(orders, order);
+  if (!row) throw Error('order_not_found');
+  recoveryColumn_(orders);
+  if (String(orders.getRange(row,RECOVERY_HASH_COLUMN).getValue()) !== accessHash)
+    throw Error('access_denied');
+  const folder = cleanupFolder_(), files = folder.getFiles(), matches = [];
+  const pattern = /^OBR_TMP_(\d{13})_([A-Za-z0-9-]+)_checkpoint_([a-f0-9-]{36})\.txt$/i;
+  while (files.hasNext()) {
+    const f = files.next(), m = pattern.exec(f.getName());
+    if (m && m[2] === order) matches.push({file:f, expiry:Number(m[1])});
+  }
+  if (p.action === 'checkpoint_get') {
+    const available = matches.filter(x => x.expiry > Date.now())
+      .sort((a,b) => b.expiry - a.expiry);
+    if (!available.length) return {ok:true,status:'expired'};
+    const data = JSON.parse(available[0].file.getBlob().getDataAsString('UTF-8'));
+    if (data.accessHash !== accessHash) throw Error('access_denied');
+    return {ok:true,status:'available',ciphertext:data.payload};
+  }
+  if (p.action === 'checkpoint_save') {
+    const payload = String(p.ciphertext || '');
+    if (!/^[A-Za-z0-9_=-]{40,250000}$/.test(payload)) throw Error('invalid_ciphertext');
+    const expiry = Date.now() + CLEANUP_TEST_TTL_MS;
+    const name = CLEANUP_PREFIX + expiry + '_' + order + '_checkpoint_' + Utilities.getUuid() + '.txt';
+    // Create first: if the write fails, the previous checkpoint remains recoverable.
+    folder.createFile(name, JSON.stringify({accessHash,payload}), MimeType.PLAIN_TEXT);
+    for (const x of matches) Drive.Files.remove(x.file.getId());
+    return {ok:true,expires_at_ms:expiry};
+  }
+  throw Error('unknown_checkpoint_action');
+}
+
 function temporaryResult_(p) {
   const action = String(p.action || '');
   const order = checkCode(p.order_id);
