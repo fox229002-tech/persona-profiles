@@ -51,6 +51,30 @@ if st.secrets.get("TEST_FAILURE_MODE", False):
             except Exception as exc:
                 st.error("Ошибка проверки: " + type(exc).__name__)
 
+        if st.button("Проверить повтор после ошибки (без ИИ)", key="generation_retry_check"):
+            try:
+                manager = OrderManager.from_streamlit_secrets()
+                order_id = "OBR-TEST-" + uuid.uuid4().hex[:20].upper()
+                secret = secrets.token_urlsafe(32)
+                access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+                manager.create_order("test", 0, order_id=order_id, recovery_hash=access_hash)
+                first_id = str(uuid.uuid4())
+                first = manager.claim_generation(order_id, "profile", access_hash, first_id)
+                if first.get("status") != "claimed":
+                    raise RuntimeError("first_claim_failed")
+                busy = manager.claim_generation(order_id, "profile", access_hash, str(uuid.uuid4()))
+                if busy.get("status") != "processing":
+                    raise RuntimeError("parallel_claim_not_blocked")
+                manager.finish_generation(order_id, "profile", access_hash, first_id, "failed")
+                second_id = str(uuid.uuid4())
+                retry = manager.claim_generation(order_id, "profile", access_hash, second_id)
+                if retry.get("status") != "claimed":
+                    raise RuntimeError("retry_not_allowed")
+                manager.finish_generation(order_id, "profile", access_hash, second_id, "failed")
+                st.success("Проверка пройдена: параллельный запуск запрещён, после ошибки повтор разрешён. ИИ не вызывался.")
+            except Exception as exc:
+                st.error("Проверка повторной попытки: " + type(exc).__name__)
+
         if st.button("Проверить обмен с Google Drive (2 минуты)", key="crypto_drive_check"):
             try:
                 from result_crypto import encrypt_result, decrypt_result
