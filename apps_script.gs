@@ -9,9 +9,26 @@
  */
 const SHEET_ID = '1Efm4TXFbsv9T6dVjHYmGDRDcYzKCcJIZbiGqFhVfXYA';
 const ORDER_HEADERS = ['order_id','created_at_msk','tariff','amount_rub','currency','payment_id','payment_status','paid_at_msk','service_status','result_sha256','result_displayed_at_msk','updated_at_msk'];
-const EVENT_HEADERS = ['event_id','order_id','event_at_msk','event_type','operation','status','result_sha256','details_code'];
+const EVENT_HEADERS = ['event_id','order_id','event_at_msk','event_type','operation','status','result_sha256','details_code','REQUEST_FLAGS'];
 const CODE = /^[A-Za-z0-9_.:-]{1,100}$/;
 const RECOVERY_HASH_COLUMN = 13;
+const REQUEST_FLAGS_COLUMN = 9;
+const REQUEST_FLAG_CODES = ['POSSIBLY_FICTIONAL','EXPLICITLY_FICTIONAL','POSSIBLE_PROMPT_INJECTION'];
+function requestFlags_(value) {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value !== 'string') throw Error('invalid_request_flags');
+  const flags = value.split(';').map(x => x.trim());
+  if (flags.some(x => !REQUEST_FLAG_CODES.includes(x)) || new Set(flags).size !== flags.length)
+    throw Error('invalid_request_flags');
+  return flags.join('; ');
+}
+function requestFlagsColumn_(s) {
+  if (s.getMaxColumns() < REQUEST_FLAGS_COLUMN)
+    s.insertColumnsAfter(s.getMaxColumns(), REQUEST_FLAGS_COLUMN - s.getMaxColumns());
+  const header = String(s.getRange(1, REQUEST_FLAGS_COLUMN).getValue());
+  if (header && header !== 'REQUEST_FLAGS') throw Error('request_flags_column_conflict');
+  if (!header) s.getRange(1, REQUEST_FLAGS_COLUMN).setValue('REQUEST_FLAGS');
+}
 function recoveryHash_(value) {
   if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) throw Error('invalid_recovery_hash');
   return value;
@@ -113,9 +130,11 @@ function run(p) {
     const type=checkCode(p.event_type), op=checkCode(p.operation,true);
     const status=checkCode(p.status), hash=checkCode(p.result_sha256,true);
     const details=checkCode(p.details_code,true);
+    const flags=requestFlags_(p.request_flags);
     const s=sheet('События');
     if (findRow(s,id)) return {ok:true,event_id:id};
-    s.appendRow([id,order,msk(),type,op,status,hash,details]);
+    requestFlagsColumn_(s);
+    s.appendRow([id,order,msk(),type,op,status,hash,details,flags]);
     return {ok:true,event_id:id};
   }
   if (action === 'get_order' || action === 'get_events') {
@@ -125,7 +144,7 @@ function run(p) {
       return {ok:true,order:r?rowObject(ORDER_HEADERS,s.getRange(r,1,1,12).getValues()[0]):null};
     }
     const s=sheet('События'), last=s.getLastRow();
-    const rows=last<2?[]:s.getRange(2,1,last-1,8).getValues();
+    const rows=last<2?[]:s.getRange(2,1,last-1,9).getValues();
     return {ok:true,events:rows.filter(r=>String(r[1])===id).map(r=>rowObject(EVENT_HEADERS,r))};
   }
   if (action === 'update_order') {
