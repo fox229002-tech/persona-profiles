@@ -75,7 +75,7 @@ if st.secrets.get("TEST_FAILURE_MODE", False):
             except Exception as exc:
                 st.error("Проверка повторной попытки: " + type(exc).__name__)
 
-        if st.button("Проверить обмен с Google Drive (2 минуты)", key="crypto_drive_check"):
+        if st.button("Проверить обмен с Google Drive (60 минут)", key="crypto_drive_check"):
             try:
                 from result_crypto import encrypt_result, decrypt_result
                 key = str(st.secrets["result_encryption"]["key"])
@@ -91,8 +91,8 @@ if st.secrets.get("TEST_FAILURE_MODE", False):
                 fetched = manager.get_temporary_result(order_id, "profile", access_hash)
                 if fetched.get("status") != "available" or decrypt_result(fetched["ciphertext"], key) != sample:
                     raise RuntimeError("Восстановленный текст не совпадает")
-                st.success("Google Drive: сохранение и восстановление OK (2 минуты)")
-                st.caption("Только фиктивные данные. Доступ истечёт через 2 минуты.")
+                st.success("Google Drive: сохранение и восстановление OK (60 минут)")
+                st.caption("Только фиктивные данные. Доступ истечёт через 60 минут.")
             except Exception as exc:
                 # Технический код ошибки без URL, токенов и содержимого ответа.
                 from order_manager import JournalError
