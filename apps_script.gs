@@ -54,7 +54,7 @@ function run(p) {
   }
   if (action === 'generation_claim' || action === 'generation_finish') {
     const order = checkCode(p.order_id), op = checkCode(p.operation);
-    if (!['profile','compatibility'].includes(op)) throw Error('invalid_operation');
+    if (!['descriptions','profile','compatibility'].includes(op)) throw Error('invalid_operation');
     const credential = recoveryHash_(p.recovery_hash);
     const orders = sheet('Заказы'), row = findRow(orders, order);
     if (!row) throw Error('order_not_found');
@@ -82,7 +82,7 @@ function run(p) {
     if (!latest || String(latest[3]) !== 'generation_claim' ||
         String(latest[0]) !== claimId) throw Error('claim_not_active');
     const status = checkCode(p.status);
-    if (!['completed','failed'].includes(status)) throw Error('invalid_generation_status');
+    if (!['completed','failed','released'].includes(status)) throw Error('invalid_generation_status');
     events.appendRow([Utilities.getUuid(),order,msk(),'generation_finish',op,status,'',claimId]);
     return {ok:true,status};
   }
