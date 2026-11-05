@@ -407,7 +407,9 @@ def save_encrypted_result(operation, result, download_text):
     state_key = f"temporary_{order_id}_{operation}"
     pending = st.session_state.get(state_key)
     if pending is None:
-        recovery_secret = secrets.token_urlsafe(32)
+        recovery_secret = st.session_state.get("order_recovery_secret")
+        if not recovery_secret:
+            raise JournalError("Отсутствует секрет восстановления заказа")
         pending = {
             "secret": recovery_secret,
             "hash": hashlib.sha256(recovery_secret.encode("utf-8")).hexdigest(),
@@ -447,16 +449,7 @@ def recovery_link(operation):
     order_id = st.session_state.get("order_id")
     if not order_id:
         return
-    pending = st.session_state.get(f"temporary_{order_id}_{operation}")
-    if not pending or not st.session_state.get(f"temporary_saved_{order_id}_{operation}"):
-        return
-    from urllib.parse import urlencode
-    url = "https://yvtsiteuv37h8wnkzdbpxx.streamlit.app/?" + urlencode({
-        "recover_order": order_id, "recover_operation": operation,
-        "recover_secret": pending["secret"],
-    })
-    st.info("Сохраните ссылку для восстановления результата в течение 2 минут. Любой, у кого есть ссылка, сможет открыть результат.")
-    st.code(url, language=None)
+    order_recovery_link()
 
 
 def restore_from_link():
