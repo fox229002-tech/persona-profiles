@@ -599,17 +599,21 @@ def restore_from_link():
             or not re.fullmatch(r"[A-Za-z0-9_-]{40,100}", secret)):
         st.error("Неверная ссылка восстановления.")
         st.stop()
+    diagnostic_stage = "initialization"
     try:
         from result_crypto import decrypt_result
+        diagnostic_stage = "journal_connection"
         manager = journal()
         if not manager:
             raise JournalError("Журнал недоступен")
         access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+        diagnostic_stage = "checkpoint_request"
         if not operation and restore_checkpoint(order_id, secret, manager, access_hash):
             st.query_params.clear()
             st.rerun()
         if not operation:
             for candidate in ("compatibility", "profile"):
+                diagnostic_stage = "legacy_result_lookup"
                 response = manager.get_temporary_result(order_id, candidate, access_hash)
                 if response.get("status") == "available":
                     operation = candidate
@@ -618,10 +622,12 @@ def restore_from_link():
                 st.info("По этому заказу пока нет доступного сохранённого результата.")
                 st.stop()
         else:
+            diagnostic_stage = "legacy_result_lookup"
             response = manager.get_temporary_result(order_id, operation, access_hash)
             if response.get("status") != "available":
                 st.warning("Срок хранения результата истёк.")
                 st.stop()
+        diagnostic_stage = "legacy_result_decryption"
         data = json.loads(decrypt_result(
             response["ciphertext"], str(st.secrets["result_encryption"]["key"])))
         if not isinstance(data.get("result"), str) or not isinstance(data.get("download_text"), str):
@@ -638,8 +644,12 @@ def restore_from_link():
             st.session_state.research_step = "compat_result"
         st.query_params.clear()
         st.rerun()
-    except (JournalError, ValueError, KeyError, TypeError):
-        st.error("Не удалось восстановить результат. Проверьте ссылку и срок действия.")
+    except Exception as exc:
+        # Do not display raw exceptions: request URLs can contain access credentials.
+        error_kind = type(exc).__name__
+        st.error("Не удалось восстановить этап. Диагностика: "
+                 + diagnostic_stage + " / " + error_kind
+                 + ". Секретную ссылку не присылайте.")
         st.stop()
     return True
 
