@@ -6,6 +6,30 @@ import requests
 import streamlit as st
 
 st.set_page_config(page_title="Лаборатория классификации", page_icon="🔬", layout="wide")
+import hmac
+
+def require_password():
+    """Block all laboratory controls until the configured password is supplied."""
+    expected = st.secrets.get("LAB_PASSWORD")
+    if not expected:
+        st.error("Доступ закрыт: добавьте LAB_PASSWORD в Secrets приложения.")
+        st.stop()
+    if st.session_state.get("lab_authenticated", False):
+        return
+    st.title("🔒 Вход в лабораторию")
+    with st.form("lab_login"):
+        supplied = st.text_input("Пароль", type="password")
+        submitted = st.form_submit_button("Войти")
+    if submitted:
+        if hmac.compare_digest(supplied.encode("utf-8"), str(expected).encode("utf-8")):
+            st.session_state["lab_authenticated"] = True
+            st.rerun()
+        else:
+            st.error("Неверный пароль")
+    st.stop()
+
+require_password()
+
 st.title("🔬 Лаборатория классификации")
 st.caption("Один исходный запрос → один ответ Gemini. Без оплаты, заказов и журналирования.")
 raw = st.text_area("Введите названия, персонажей или описания", height=170, placeholder='Снежко (сериал «Большая фарма»), Синий треугольник, Ирина Кара (сериал «Большая фарма»)')
