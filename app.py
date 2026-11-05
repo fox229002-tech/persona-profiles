@@ -30,6 +30,27 @@ if st.secrets.get("TEST_FAILURE_MODE", False):
             except Exception:
                 st.error("Шифрование: ошибка. Проверьте ключ и настройки.")
 
+        if st.button("Проверить запрет повторной генерации (без ИИ)", key="generation_replay_check"):
+            try:
+                manager = OrderManager.from_streamlit_secrets()
+                order_id = st.session_state.get("order_id")
+                secret = st.session_state.get("order_recovery_secret")
+                if not order_id or not secret:
+                    st.warning("Откройте исследование с заказом в текущей сессии.")
+                else:
+                    access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+                    response = manager.claim_generation(order_id, "profile", access_hash, str(uuid.uuid4()))
+                    if response.get("status") == "completed":
+                        st.success("Повторная генерация заблокирована сервером. ИИ не вызывался.")
+                    elif response.get("status") == "processing":
+                        st.info("Сервер сообщает: генерация ещё выполняется. ИИ не вызывался.")
+                    elif response.get("status") == "claimed":
+                        st.warning("Сервер разрешил генерацию: у этого заказа нет завершённого профиля. ИИ не вызывался.")
+                    else:
+                        st.error("Неожиданный статус проверки.")
+            except Exception as exc:
+                st.error("Ошибка проверки: " + type(exc).__name__)
+
         if st.button("Проверить обмен с Google Drive (2 минуты)", key="crypto_drive_check"):
             try:
                 from result_crypto import encrypt_result, decrypt_result
