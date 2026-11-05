@@ -243,7 +243,7 @@ STYLE_RULES = (
 
 
 def split_characters(value: str) -> list[str]:
-    """Split commas/semicolons outside parentheses and quotation marks."""
+    """Split comma-separated names, preserving commas in parentheses and quotes."""
     names, buffer, depth, quote = [], [], 0, None
     for char in value.strip():
         if char in ('"', '«', '»'):
@@ -255,7 +255,7 @@ def split_characters(value: str) -> list[str]:
             depth += 1
         elif char == ')':
             depth = max(0, depth - 1)
-        if char in ',;\\n' and depth == 0 and quote is None:
+        if char == ',' and depth == 0 and quote is None:
             item = ''.join(buffer).strip()
             if item:
                 names.append(item)
