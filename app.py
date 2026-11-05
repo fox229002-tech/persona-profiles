@@ -303,11 +303,23 @@ OBJECT_CHARACTER_PATTERN = re.compile(
 )
 
 
+# Географические и институциональные объекты не являются именами персонажей.
+PLACE_CHARACTER_PATTERN = re.compile(
+    r"^(?:[а-яё-]+\s+){0,3}"
+    r"(?:монастырь|храм|собор|церковь|мечеть|школа|университет|"
+    r"больница|музей|библиотека|город|деревня|посёлок|"
+    r"остров|озеро|река|гора|парк|дворец|замок|здание)$",
+    re.IGNORECASE,
+)
+
+
 def needs_character_clarification(name: str) -> bool:
     if re.search(r'\([^()]+\)|«[^»]+»|"[^"]+"', name):
         return False
     clean = name.strip()
-    if NUMBER_CHARACTER_PATTERN.fullmatch(clean) or OBJECT_CHARACTER_PATTERN.fullmatch(clean):
+    if (NUMBER_CHARACTER_PATTERN.fullmatch(clean)
+            or OBJECT_CHARACTER_PATTERN.fullmatch(clean)
+            or PLACE_CHARACTER_PATTERN.fullmatch(clean)):
         return True
     return len(clean.split()) == 1
 
