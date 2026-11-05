@@ -395,6 +395,42 @@ def journal_result(result, operation, download_text):
 
 
 
+def generation_guard(operation):
+    """Claim one server-side generation slot per order and operation."""
+    manager = journal()
+    order_id = st.session_state.get("order_id")
+    secret = st.session_state.get("order_recovery_secret")
+    if not manager or not order_id or not secret:
+        raise JournalError("Невозможно проверить право генерации")
+    key = f"generation_claim_{order_id}_{operation}"
+    if st.session_state.get(key):
+        return st.session_state[key]
+    claim_id = str(uuid.uuid4())
+    access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+    response = manager.claim_generation(order_id, operation, access_hash, claim_id)
+    status = response.get("status")
+    if status == "completed":
+        raise JournalError("Результат уже создан. Откройте ссылку восстановления.")
+    if status == "processing":
+        raise JournalError("Генерация уже выполняется. Дождитесь её завершения.")
+    if status != "claimed":
+        raise JournalError("Не удалось зарезервировать генерацию")
+    st.session_state[key] = claim_id
+    return claim_id
+
+
+def generation_finish(operation, status):
+    manager = journal()
+    order_id = st.session_state.get("order_id")
+    secret = st.session_state.get("order_recovery_secret")
+    claim_id = st.session_state.get(f"generation_claim_{order_id}_{operation}")
+    if not manager or not order_id or not secret or not claim_id:
+        raise JournalError("Не найдена активная генерация")
+    access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+    manager.finish_generation(order_id, operation, access_hash, claim_id, status)
+    st.session_state.pop(f"generation_claim_{order_id}_{operation}", None)
+
+
 def save_encrypted_result(operation, result, download_text):
     """Test-only: save encrypted output after journal completion; retry without new AI call."""
     if not st.secrets.get("TEST_FAILURE_MODE", False):
@@ -706,14 +742,20 @@ elif step == "descriptions":
                 try:
                     pending = st.session_state.get("pending_profile_result")
                     if pending is None:
+                        generation_guard("profile")
                         journal_event("ai_request", operation="profile")
-                        result = analyze(chosen)
+                        try:
+                            result = analyze(chosen)
+                        except Exception:
+                            generation_finish("profile", "failed")
+                            raise
                         download_text = build_profile_text(chosen, result)
                         st.session_state.pending_profile_result = (result, download_text)
                     else:
                         result, download_text = pending
                     journal_result(result, "profile", download_text)
                     save_encrypted_result("profile", result, download_text)
+                    generation_finish("profile", "completed")
                     st.session_state.pop("pending_profile_result", None)
                     st.session_state.result = result
                     st.session_state.profile_text = download_text
@@ -801,8 +843,13 @@ elif step == "compat_input":
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
                     pending = st.session_state.get("pending_compat_result")
                     if pending is None:
+                        generation_guard("compatibility")
                         journal_event("ai_request", operation="compatibility")
-                        result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
+                        try:
+                            result = analyze_compatibility(texts[0], texts[1], na, nb, relation)
+                        except Exception:
+                            generation_finish("compatibility", "failed")
+                            raise
                         download_text = (
                             f"РАЗБОР СОВМЕСТИМОСТИ\n{na} и {nb} ({relation})\n\n{result}"
                         )
@@ -811,6 +858,7 @@ elif step == "compat_input":
                         result, download_text = pending
                     journal_result(result, "compatibility", download_text)
                     save_encrypted_result("compatibility", result, download_text)
+                    generation_finish("compatibility", "completed")
                     st.session_state.pop("pending_compat_result", None)
                     st.session_state.compat = result
                     st.session_state.compat_download_clicked = False
