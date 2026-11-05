@@ -77,15 +77,19 @@ class OrderManager:
         return order_id
 
     def log_event(self, order_id, event_type, *, operation="", status="ok",
-                  result=None, details_code="", event_id=None):
+                  result=None, details_code="", event_id=None, request_flags=""):
         event_id = event_id or str(uuid.uuid4())
         for value in (order_id, event_type, operation or "x", status, details_code or "x", event_id):
             if not isinstance(value, str) or not CODE.fullmatch(value):
                 raise ValueError("В журнале допустимы только технические коды")
+        allowed_flags = {"POSSIBLY_FICTIONAL", "EXPLICITLY_FICTIONAL", "POSSIBLE_PROMPT_INJECTION"}
+        flags = [flag.strip() for flag in request_flags.split(";")] if request_flags else []
+        if len(flags) != len(set(flags)) or any(flag not in allowed_flags for flag in flags):
+            raise ValueError("Недопустимые метки запроса")
         self._call("log_event", event_id=event_id, order_id=order_id,
                    event_type=event_type, operation=operation, status=status,
                    result_sha256=sha256(result) if result is not None else "",
-                   details_code=details_code)
+                   details_code=details_code, request_flags="; ".join(flags))
         return event_id
 
     def get_order(self, order_id):
