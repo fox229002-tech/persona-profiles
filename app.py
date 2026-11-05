@@ -10,6 +10,7 @@ import uuid
 from pathlib import Path
 
 import requests
+import tiktoken
 import streamlit as st
 from order_manager import OrderManager, JournalError
 
@@ -284,44 +285,31 @@ COMMAND_PATTERN = re.compile(
 )
 
  
-CLARIFY_CHARACTER_MESSAGE = "Уточните персонажа в соответствии с правилами."
-
-# Проверяем только однозначные формальные случаи, без догадок об идентичности.
-NUMBER_CHARACTER_PATTERN = re.compile(
-    r"^(?:[+-]?\d+(?:[.\-]\d+)*|"
-    r"число\s+\d+|цифра\s+\d+|"
-    r"первый|второй|третий|сорок\s+семь)$",
-    re.IGNORECASE,
-)
-OBJECT_CHARACTER_PATTERN = re.compile(
-    r"^(?:кофейн(?:ая|ую)\s+чашк[а-я]*|чашка|"
-    r"синий\s+треугольник|треугольник|"
-    r"стол|стул|лампа|книга|карандаш|"
-    r"телефон|зеркало|камень|дерево|"
-    r"кружка|чайник|ложка|тарелка)$",
-    re.IGNORECASE,
-)
+INPUT_TOKEN_LIMIT = 300
+INPUT_TOKENIZER = tiktoken.get_encoding("cl100k_base")
 
 
-# Географические и институциональные объекты не являются именами персонажей.
-PLACE_CHARACTER_PATTERN = re.compile(
-    r"^(?:[а-яё-]+\s+){0,3}"
-    r"(?:монастырь|храм|собор|церковь|мечеть|школа|университет|"
-    r"больница|музей|библиотека|город|деревня|посёлок|"
-    r"остров|озеро|река|гора|парк|дворец|замок|здание)$",
-    re.IGNORECASE,
-)
-
-
-def needs_character_clarification(name: str) -> bool:
-    if re.search(r'\([^()]+\)|«[^»]+»|"[^"]+"', name):
-        return False
-    clean = name.strip()
-    if (NUMBER_CHARACTER_PATTERN.fullmatch(clean)
-            or OBJECT_CHARACTER_PATTERN.fullmatch(clean)
-            or PLACE_CHARACTER_PATTERN.fullmatch(clean)):
-        return True
-    return len(clean.split()) == 1
+def has_forbidden_outside_qualifiers(value: str) -> bool:
+    depth = 0
+    quote = None
+    for char in value:
+        if quote:
+            if char == quote:
+                quote = None
+            continue
+        if char in ('«', '"'):
+            quote = '»' if char == '«' else '"'
+        elif char == '(':
+            depth += 1
+        elif char == ')':
+            if depth == 0:
+                return True
+            depth -= 1
+        elif depth == 0 and not (
+            char.isalpha() or char.isspace() or char in ",-—–'"
+        ):
+            return True
+    return depth != 0 or quote is not None
 
 
 def check_character_input(value: str) -> list[str]:
@@ -330,11 +318,11 @@ def check_character_input(value: str) -> list[str]:
         not 1 <= len(names) <= 3
         or len(value) > 450
         or any(len(name) > 150 for name in names)
+        or len(INPUT_TOKENIZER.encode(value)) > INPUT_TOKEN_LIMIT
         or COMMAND_PATTERN.search(value)
+        or has_forbidden_outside_qualifiers(value)
     ):
         raise ValueError(INVALID_CHARACTER_MESSAGE)
-    if any(needs_character_clarification(name) for name in names):
-        raise ValueError(CLARIFY_CHARACTER_MESSAGE)
     return names
 
 
@@ -930,10 +918,10 @@ elif step == "characters":
     with b_art:
         show_art("man.svg")
     st.info(
-        "Введите от 1 до 3 персонажей так, чтобы каждого можно было однозначно идентифицировать. "
+        "Введите от 1 до 3 персонажей так, чтобы каждого можно было однозначно идентифицировать (всего не более 300 токенов). "
         "Разделяйте персонажей запятыми; в остальных местах запятые не ставьте. "
         "Уточнения пишите только в скобках или кавычках, без описания характера. "
-        "Одно имя или фамилия, неодушевлённый предмет и числительное без уточнения не принимаются. "
+        "Цифры и специальные символы используйте только внутри скобок или кавычек. "
         "Примеры: Эдвард Лоренц (математик — теория хаоса), "
         "Мария Кюри (учёная — Нобелевская премия), "
         "Наполеон Бонапарт (император Франции XIX века), "
