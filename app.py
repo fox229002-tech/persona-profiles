@@ -597,6 +597,10 @@ st.caption(
 step = st.session_state.get("research_step", "choose")
 plan = st.session_state.get("paid_plan")
 
+# Show the same order recovery link on every post-checkout research screen.
+if step in ("characters", "descriptions", "profile_result", "compat_input", "compat_result"):
+    order_recovery_link()
+
 if step == "choose":
     st.subheader("Выберите программу исследования")
     st.write("Начните с исследования своего профиля или изучите совместимость двух профилей. "
@@ -650,7 +654,6 @@ elif step == "checkout":
         navigate("choose")
 
 elif step == "characters":
-    order_recovery_link()
     st.subheader("Шаг 1 из 3. Ваши образы")
     a_art, b_art = st.columns(2)
     with a_art:
@@ -727,7 +730,6 @@ elif step == "profile_result":
             navigate("descriptions")
     else:
         st.subheader("Шаг 3 из 3. Ваш профиль")
-        recovery_link("profile")
         st.markdown(st.session_state.result)
         if not st.session_state.get("profile_display_logged"):
             try:
@@ -825,7 +827,6 @@ elif step == "compat_result":
             navigate("compat_input")
     else:
         st.subheader("💞 Разбор совместимости")
-        recovery_link("compatibility")
         st.markdown(st.session_state.compat)
         if not st.session_state.get("compat_display_logged"):
             try:
