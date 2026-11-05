@@ -101,3 +101,16 @@ class OrderManager:
         if result is not None:
             fields["result_sha256"] = sha256(result)
         self._call("update_order", **fields)
+
+    def save_temporary_result(self, order_id, operation, ciphertext, recovery_hash):
+        """Store only Fernet ciphertext; no plaintext sent to Apps Script."""
+        if operation not in ("profile", "compatibility"):
+            raise ValueError("Неверный тип результата")
+        return self._call("temp_save", order_id=order_id, operation=operation,
+                          ciphertext=ciphertext, recovery_hash=recovery_hash)
+
+    def get_temporary_result(self, order_id, operation, recovery_hash):
+        if operation not in ("profile", "compatibility"):
+            raise ValueError("Неверный тип результата")
+        return self._call("temp_get", order_id=order_id, operation=operation,
+                          recovery_hash=recovery_hash)
