@@ -115,6 +115,14 @@ class OrderManager:
         return self._call("generation_finish", order_id=order_id, operation=operation,
                           recovery_hash=recovery_hash, claim_id=claim_id, status=status)
 
+    def save_checkpoint(self, order_id, ciphertext, recovery_hash):
+        return self._call("checkpoint_save", order_id=order_id,
+                          ciphertext=ciphertext, recovery_hash=recovery_hash)
+
+    def get_checkpoint(self, order_id, recovery_hash):
+        return self._call("checkpoint_get", order_id=order_id,
+                          recovery_hash=recovery_hash)
+
     def save_temporary_result(self, order_id, operation, ciphertext, recovery_hash):
         """Store only Fernet ciphertext; no plaintext sent to Apps Script."""
         if operation not in ("profile", "compatibility"):
