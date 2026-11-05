@@ -285,7 +285,14 @@ COMMAND_PATTERN = re.compile(
 )
 
  
-INPUT_TOKEN_LIMIT = 300
+ROLE_MARKER_PATTERN = re.compile(
+    r"\[\s*(?:system|developer|assistant|user|inst|/inst|sys|/sys)\s*\]"
+    r"|<\|(?:im_start|im_end|system|developer|assistant|user)\|>"
+    r"|<<\s*(?:sys|/sys)\s*>>",
+    re.IGNORECASE,
+)
+
+INPUT_TOKEN_LIMIT = 900
 INPUT_TOKENIZER = tiktoken.get_encoding("cl100k_base")
 
 
@@ -316,10 +323,11 @@ def check_character_input(value: str) -> list[str]:
     names = split_characters(value)
     if (
         not 1 <= len(names) <= 3
-        or len(value) > 450
-        or any(len(name) > 150 for name in names)
+        or len(value) > 1350
+        or any(len(name) > 450 for name in names)
         or len(INPUT_TOKENIZER.encode(value)) > INPUT_TOKEN_LIMIT
         or COMMAND_PATTERN.search(value)
+        or ROLE_MARKER_PATTERN.search(value)
         or has_forbidden_outside_qualifiers(value)
     ):
         raise ValueError(INVALID_CHARACTER_MESSAGE)
