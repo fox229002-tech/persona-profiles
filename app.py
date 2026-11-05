@@ -995,7 +995,8 @@ elif step == "characters":
     if st.button("Продолжить", disabled=not characters.strip()):
         try:
             checked_names = check_character_input(characters)
-            check_character_meanings(checked_names)
+            with st.spinner("Запрос принят в обработку. Пожалуйста, ждите..."):
+                check_character_meanings(checked_names)
         except ValueError as exc:
             st.error(str(exc))
             st.stop()
