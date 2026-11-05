@@ -1221,8 +1221,9 @@ elif step == "compat_input":
                 try:
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
                     pending = st.session_state.get("pending_compat_result")
+                    
                     if pending is None:
-                                                safe_texts = [
+                        safe_texts = [
                             validate_compatibility_profile(t)
                             for t in texts
                         ]
