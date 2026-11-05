@@ -52,6 +52,40 @@ function run(p) {
   if (action === 'temp_save' || action === 'temp_get') {
     return temporaryResult_(p);
   }
+  if (action === 'generation_claim' || action === 'generation_finish') {
+    const order = checkCode(p.order_id), op = checkCode(p.operation);
+    if (!['profile','compatibility'].includes(op)) throw Error('invalid_operation');
+    const credential = recoveryHash_(p.recovery_hash);
+    const orders = sheet('Заказы'), row = findRow(orders, order);
+    if (!row) throw Error('order_not_found');
+    recoveryColumn_(orders);
+    if (String(orders.getRange(row,RECOVERY_HASH_COLUMN).getValue()) !== credential)
+      throw Error('access_denied');
+    const events = sheet('События'), last = events.getLastRow();
+    const records = last < 2 ? [] : events.getRange(2,1,last-1,8).getValues();
+    const relevant = records.filter(r => String(r[1]) === order &&
+      String(r[4]) === op && ['generation_claim','generation_finish'].includes(String(r[3])));
+    const latest = relevant.length ? relevant[relevant.length-1] : null;
+    const claimId = checkCode(p.claim_id);
+    if (action === 'generation_claim') {
+      if (latest && String(latest[3]) === 'generation_finish' && String(latest[5]) === 'completed')
+        return {ok:true,status:'completed'};
+      if (latest && String(latest[3]) === 'generation_claim') {
+        // A lease prevents parallel AI requests even across Streamlit sessions.
+        const age = Date.now() - Number(latest[7]);
+        if (age >= 0 && age < 10 * 60 * 1000) return {ok:true,status:'processing'};
+        // After an abandoned lease, a new claim is allowed.
+      }
+      events.appendRow([claimId,order,msk(),'generation_claim',op,'processing','',String(Date.now())]);
+      return {ok:true,status:'claimed'};
+    }
+    if (!latest || String(latest[3]) !== 'generation_claim' ||
+        String(latest[0]) !== claimId) throw Error('claim_not_active');
+    const status = checkCode(p.status);
+    if (!['completed','failed'].includes(status)) throw Error('invalid_generation_status');
+    events.appendRow([Utilities.getUuid(),order,msk(),'generation_finish',op,status,'',claimId]);
+    return {ok:true,status};
+  }
   if (action === 'create_order') {
     const id=checkCode(p.order_id), tariff=checkCode(p.tariff);
     if (!Number.isInteger(p.amount_rub) || p.amount_rub<0) throw Error('invalid_amount');
