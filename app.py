@@ -389,7 +389,8 @@ def generate_profiles(characters: str) -> list[dict]:
     profiles = json.loads(raw)
     profiles = validate_cards(profiles, len(names))
     flags = classify_request_text(characters)
-    if any(card.pop("_possibly_fictional", False) is True for card in profiles):
+    possibly_fictional = [card.pop("_possibly_fictional", False) for card in profiles]
+    if any(value is True for value in possibly_fictional):
         flags.add("POSSIBLY_FICTIONAL")
     st.session_state.request_flags = "; ".join(sorted(flags))
     random.shuffle(profiles)  # порядок не должен выдавать, где чей образ
