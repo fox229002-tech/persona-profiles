@@ -676,7 +676,7 @@ elif step == "characters":
                         del st.session_state[key]
                 navigate("descriptions")
             except Exception as exc:
-                st.error(f"Не получилось создать описания: {exc}. Введённые персонажи сохранены.")
+                st.error(f"Не получилось создать описания: {str(exc).rstrip(chr(46))}. Введённые персонажи сохранены.")
 
 elif step == "descriptions":
     profiles = st.session_state.get("profiles")
