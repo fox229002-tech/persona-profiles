@@ -81,7 +81,31 @@ if st.button("Классифицировать", type="primary", disabled=not ra
                 st.session_state["lab_original"] = original
                 st.session_state["lab_input"] = raw
                 st.session_state["lab_model"] = model
-            except (requests.RequestException, ValueError, KeyError, json.JSONDecodeError) as exc:
+            except requests.HTTPError as exc:
+                response = exc.response
+                status = response.status_code if response is not None else "неизвестен"
+                detail = "Нет описания от API"
+                if response is not None:
+                    try:
+                        detail = str(response.json().get("error", {}).get("message", detail))
+                    except (ValueError, AttributeError):
+                        pass
+                hints = {
+                    400: "Проверьте название модели и параметры запроса.",
+                    401: "Проверьте API-ключ.",
+                    403: "Проверьте доступ к модели и разрешения API-ключа.",
+                    404: "Модель не найдена или недоступна.",
+                    429: "Превышена квота или лимит запросов.",
+                    500: "Ошибка сервиса Gemini.",
+                    503: "Сервис Gemini временно недоступен.",
+                }
+                st.error(f"Gemini API: HTTP {status}. {hints.get(status, 'Проверьте настройки Gemini.')}")
+                key = str(st.secrets.get("GEMINI_API_KEY", ""))
+                if key:
+                    detail = detail.replace(key, "[скрыто]")
+                detail = re.sub(r"AIza[0-9A-Za-z_-]{20,}", "[скрыто]", detail)
+                st.caption("Сообщение Gemini: " + detail[:500])
+            except (requests.RequestException, ValueError, KeyError) as exc:
                 st.error("Ошибка запроса или формата ответа: " + type(exc).__name__)
 
 if "lab_result" in st.session_state:
