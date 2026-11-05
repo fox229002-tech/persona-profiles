@@ -394,6 +394,39 @@ def journal_result(result, operation, download_text):
         st.session_state[completed_key] = True
 
 
+
+def save_encrypted_result(operation, result, download_text):
+    """Test-only: save encrypted output after journal completion; retry without new AI call."""
+    if not st.secrets.get("TEST_FAILURE_MODE", False):
+        return
+    from result_crypto import encrypt_result, decrypt_result
+    manager = journal()
+    order_id = st.session_state.get("order_id")
+    if not manager or not order_id:
+        raise JournalError("Нет заказа для временного хранения")
+    state_key = f"temporary_{order_id}_{operation}"
+    pending = st.session_state.get(state_key)
+    if pending is None:
+        recovery_secret = secrets.token_urlsafe(32)
+        pending = {
+            "hash": hashlib.sha256(recovery_secret.encode("utf-8")).hexdigest(),
+            "ciphertext": encrypt_result(
+                json.dumps({"result": result, "download_text": download_text}, ensure_ascii=False),
+                str(st.secrets["result_encryption"]["key"])),
+        }
+        st.session_state[state_key] = pending
+    try:
+        manager.save_temporary_result(order_id, operation, pending["ciphertext"], pending["hash"])
+    except JournalError as exc:
+        # A timeout can happen after successful storage; verify exact ciphertext.
+        if "result_already_exists" not in str(exc):
+            raise
+        existing = manager.get_temporary_result(order_id, operation, pending["hash"])
+        if existing.get("status") != "available" or existing.get("ciphertext") != pending["ciphertext"]:
+            raise
+    st.session_state[f"temporary_saved_{order_id}_{operation}"] = True
+
+
 def process_payment(plan_key: str, amount: int) -> bool:
     """Демонстрационная оплата; реальных списаний нет."""
     manager = journal()
@@ -586,6 +619,7 @@ elif step == "descriptions":
                     else:
                         result, download_text = pending
                     journal_result(result, "profile", download_text)
+                    save_encrypted_result("profile", result, download_text)
                     st.session_state.pop("pending_profile_result", None)
                     st.session_state.result = result
                     st.session_state.profile_text = download_text
@@ -682,6 +716,7 @@ elif step == "compat_input":
                     else:
                         result, download_text = pending
                     journal_result(result, "compatibility", download_text)
+                    save_encrypted_result("compatibility", result, download_text)
                     st.session_state.pop("pending_compat_result", None)
                     st.session_state.compat = result
                     st.session_state.compat_download_clicked = False
