@@ -288,14 +288,14 @@ CLARIFY_CHARACTER_MESSAGE = "Уточните персонажа в соотве
 
 # Проверяем только однозначные формальные случаи, без догадок об идентичности.
 NUMBER_CHARACTER_PATTERN = re.compile(
-    r"^(?:[+-]?\\d+(?:[.\\-]\\d+)*|"
-    r"число\\s+\\d+|цифра\\s+\\d+|"
-    r"первый|второй|третий|сорок\\s+семь)$",
+    r"^(?:[+-]?\d+(?:[.\-]\d+)*|"
+    r"число\s+\d+|цифра\s+\d+|"
+    r"первый|второй|третий|сорок\s+семь)$",
     re.IGNORECASE,
 )
 OBJECT_CHARACTER_PATTERN = re.compile(
-    r"^(?:кофейн(?:ая|ую)\\s+чашк[а-я]*|чашка|"
-    r"синий\\s+треугольник|треугольник|"
+    r"^(?:кофейн(?:ая|ую)\s+чашк[а-я]*|чашка|"
+    r"синий\s+треугольник|треугольник|"
     r"стол|стул|лампа|книга|карандаш|"
     r"телефон|зеркало|камень|дерево|"
     r"кружка|чайник|ложка|тарелка)$",
@@ -304,13 +304,11 @@ OBJECT_CHARACTER_PATTERN = re.compile(
 
 
 def needs_character_clarification(name: str) -> bool:
-    # Пояснение допустимо в круглых скобках или кавычках.
-    if re.search(r"\\([^()]+\\)|«[^»]+»|\\\"[^\\\"]+\\\"", name):
+    if re.search(r'\([^()]+\)|«[^»]+»|"[^"]+"', name):
         return False
     clean = name.strip()
     if NUMBER_CHARACTER_PATTERN.fullmatch(clean) or OBJECT_CHARACTER_PATTERN.fullmatch(clean):
         return True
-    # Одно слово — только имя, фамилия либо ник без идентификатора.
     return len(clean.split()) == 1
 
 
