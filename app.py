@@ -48,8 +48,14 @@ if st.secrets.get("TEST_FAILURE_MODE", False):
                     raise RuntimeError("Восстановленный текст не совпадает")
                 st.success("Google Drive: сохранение и восстановление OK (2 минуты)")
                 st.caption("Только фиктивные данные. Доступ истечёт через 2 минуты.")
-            except Exception:
-                st.error("Проверка обмена не прошла. Посмотри журналы Apps Script и Streamlit.")
+            except Exception as exc:
+                # Технический код ошибки без URL, токенов и содержимого ответа.
+                from order_manager import JournalError
+                if isinstance(exc, JournalError):
+                    st.error("Обмен: ошибка журнала. " + str(exc).split("Apps Script отклонил операцию: ")[-1].splitlines()[0][:120])
+                else:
+                    st.error("Обмен: ошибка типа " + type(exc).__name__)
+                st.caption("Ключ шифрования и текст результата не отображаются.")
 
 
 
