@@ -49,6 +49,9 @@ function rowObject(headers, row) {
 }
 function run(p) {
   const action = checkCode(p.action);
+  if (action === 'checkpoint_save' || action === 'checkpoint_get') {
+    return checkpoint_(p);
+  }
   if (action === 'temp_save' || action === 'temp_get') {
     return temporaryResult_(p);
   }
