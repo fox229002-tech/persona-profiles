@@ -13,6 +13,22 @@ from order_manager import OrderManager, JournalError
 
 st.set_page_config(page_title="Образы — исследование себя", page_icon="🌿", layout="wide")
 
+# Временная диагностика: доступна только при включённом тестовом режиме.
+if st.secrets.get("TEST_FAILURE_MODE", False):
+    with st.sidebar.expander("🔐 Проверка шифрования"):
+        if st.button("Проверить ключ Fernet", key="crypto_check"):
+            try:
+                from result_crypto import encrypt_result, decrypt_result
+                key = str(st.secrets["result_encryption"]["key"])
+                sample = "Тест шифрования: Образы 🌿"
+                token = encrypt_result(sample, key)
+                if decrypt_result(token, key) != sample:
+                    raise RuntimeError("Текст не совпал")
+                st.success("Шифрование: OK")
+            except Exception:
+                st.error("Шифрование: ошибка. Проверьте ключ и настройки.")
+
+
 SYSTEM = "Ты умный и эмпатичный ИИ, помогай пользователю находить себя."
 
 
