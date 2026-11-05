@@ -374,7 +374,7 @@ def generate_profiles(characters: str) -> list[dict]:
         "adaptation (строка: стратегия адаптации, 2–3 предложения).\n\n"
         + CARD_SAMPLES
     )
-    raw = ask_llm(prompt, max_output_tokens=200 + 700 * len(names))
+    raw = ask_llm(prompt, max_output_tokens=600 + 2100 * len(names))
     raw = re.sub(r"^```(?:json)?|```$", "", raw.strip(), flags=re.M).strip()
     profiles = json.loads(raw)
     profiles = validate_cards(profiles, len(names))
