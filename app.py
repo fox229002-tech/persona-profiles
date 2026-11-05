@@ -561,6 +561,7 @@ def restore_checkpoint(order_id, secret, manager, access_hash):
     st.session_state.order_recovery_secret = secret
     st.session_state.research_step = step
     st.session_state.site_page = "Исследование"
+    st.session_state.pop("compat_inputs_restored", None)
     return True
 
 
@@ -807,21 +808,18 @@ elif step == "characters":
     if st.button("Продолжить", disabled=not characters.strip()):
         with st.spinner("Создаю описания..."):
             try:
-                generation_guard("descriptions")
-                try:
-                    generated_profiles = generate_profiles(characters)
-                except Exception:
-                    generation_finish("descriptions", "failed")
-                    raise
-                # Descriptions are only held in the current session, not in the
-                # encrypted result store. Release the lease after successful
-                # generation so a lost session does not permanently block input.
-                st.session_state.profiles = generated_profiles
-                generation_finish("descriptions", "released")
+                if not st.session_state.get("profiles"):
+                    generation_guard("descriptions")
+                    try:
+                        st.session_state.profiles = generate_profiles(characters)
+                    except Exception:
+                        generation_finish("descriptions", "failed")
+                        raise
                 for key in list(st.session_state):
                     if str(key).startswith("pick_"):
                         del st.session_state[key]
                 save_progress("descriptions")
+                generation_finish("descriptions", "released")
                 navigate("descriptions")
             except Exception as exc:
                 st.error(f"Не получилось создать описания: {str(exc).rstrip(chr(46))}. Введённые персонажи сохранены.")
@@ -933,6 +931,16 @@ elif step == "compat_input":
         show_art("couple.svg")
         st.info("Загрузите два готовых профиля (.txt или .docx) или вставьте текст. "
                 "Можно использовать профиль, полученный на предыдущем этапе.")
+        # File uploader contents do not survive a browser restart: restore their
+        # extracted text into the editable fields instead.
+        saved_inputs = st.session_state.get("compat_inputs", {})
+        if saved_inputs and not st.session_state.get("compat_inputs_restored"):
+            for index, key in enumerate(("a", "b")):
+                values = saved_inputs.get("texts", [])
+                if len(values) > index and not st.session_state.get(f"text_{key}"):
+                    st.session_state[f"text_{key}"] = values[index]
+            st.session_state["use_mine"] = False
+            st.session_state["compat_inputs_restored"] = True
         relation = st.selectbox("Тип отношений", RELATION_TYPES, key="compat_relation")
         texts, names = [], []
         for key, default in (("a", "Человек А"), ("b", "Человек Б")):
