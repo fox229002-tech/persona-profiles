@@ -429,6 +429,20 @@ def save_encrypted_result(operation, result, download_text):
 
 
 
+def order_recovery_link():
+    """Stable link issued at checkout; no result is required yet."""
+    order_id = st.session_state.get("order_id")
+    secret = st.session_state.get("order_recovery_secret")
+    if not order_id or not secret:
+        return
+    from urllib.parse import urlencode
+    url = "https://yvtsiteuv37h8wnkzdbpxx.streamlit.app/?" + urlencode({
+        "recover_order": order_id, "recover_secret": secret,
+    })
+    st.info("Сохраните ссылку восстановления заказа. Она откроет последний сохранённый результат, если он уже готов. Не передавайте ссылку другим.")
+    st.code(url, language=None)
+
+
 def recovery_link(operation):
     order_id = st.session_state.get("order_id")
     if not order_id:
@@ -454,7 +468,7 @@ def restore_from_link():
         return False
     st.session_state.site_page = "Исследование"
     if (not re.fullmatch(r"OBR-[A-Za-z0-9-]{10,90}", order_id)
-            or operation not in ("profile", "compatibility")
+            or operation not in ("", "profile", "compatibility")
             or not re.fullmatch(r"[A-Za-z0-9_-]{40,100}", secret)):
         st.error("Неверная ссылка восстановления.")
         st.stop()
@@ -464,10 +478,20 @@ def restore_from_link():
         if not manager:
             raise JournalError("Журнал недоступен")
         access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
-        response = manager.get_temporary_result(order_id, operation, access_hash)
-        if response.get("status") != "available":
-            st.warning("Срок хранения результата истёк.")
-            st.stop()
+        if not operation:
+            for candidate in ("compatibility", "profile"):
+                response = manager.get_temporary_result(order_id, candidate, access_hash)
+                if response.get("status") == "available":
+                    operation = candidate
+                    break
+            else:
+                st.info("По этому заказу пока нет доступного сохранённого результата.")
+                st.stop()
+        else:
+            response = manager.get_temporary_result(order_id, operation, access_hash)
+            if response.get("status") != "available":
+                st.warning("Срок хранения результата истёк.")
+                st.stop()
         data = json.loads(decrypt_result(
             response["ciphertext"], str(st.secrets["result_encryption"]["key"])))
         if not isinstance(data.get("result"), str) or not isinstance(data.get("download_text"), str):
@@ -633,6 +657,7 @@ elif step == "checkout":
         navigate("choose")
 
 elif step == "characters":
+    order_recovery_link()
     st.subheader("Шаг 1 из 3. Ваши образы")
     a_art, b_art = st.columns(2)
     with a_art:
