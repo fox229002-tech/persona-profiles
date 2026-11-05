@@ -11,6 +11,18 @@ const SHEET_ID = '1Efm4TXFbsv9T6dVjHYmGDRDcYzKCcJIZbiGqFhVfXYA';
 const ORDER_HEADERS = ['order_id','created_at_msk','tariff','amount_rub','currency','payment_id','payment_status','paid_at_msk','service_status','result_sha256','result_displayed_at_msk','updated_at_msk'];
 const EVENT_HEADERS = ['event_id','order_id','event_at_msk','event_type','operation','status','result_sha256','details_code'];
 const CODE = /^[A-Za-z0-9_.:-]{1,100}$/;
+const RECOVERY_HASH_COLUMN = 13;
+function recoveryHash_(value) {
+  if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) throw Error('invalid_recovery_hash');
+  return value;
+}
+function recoveryColumn_(s) {
+  if (s.getMaxColumns() < RECOVERY_HASH_COLUMN) s.insertColumnsAfter(s.getMaxColumns(), RECOVERY_HASH_COLUMN - s.getMaxColumns());
+  const header = String(s.getRange(1, RECOVERY_HASH_COLUMN).getValue());
+  if (header && header !== 'recovery_hash') throw Error('recovery_column_conflict');
+  if (!header) s.getRange(1, RECOVERY_HASH_COLUMN).setValue('recovery_hash');
+}
+
 function output(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -44,9 +56,19 @@ function run(p) {
     const id=checkCode(p.order_id), tariff=checkCode(p.tariff);
     if (!Number.isInteger(p.amount_rub) || p.amount_rub<0) throw Error('invalid_amount');
     const s=sheet('Заказы');
-    if (findRow(s,id)) return {ok:true,order_id:id};
+    const recoveryHash = p.recovery_hash === undefined ? '' : recoveryHash_(p.recovery_hash);
+    if (recoveryHash) recoveryColumn_(s);
+    const existing = findRow(s,id);
+    if (existing) {
+      if (recoveryHash) {
+        const current = String(s.getRange(existing, RECOVERY_HASH_COLUMN).getValue());
+        if (current && current !== recoveryHash) throw Error('recovery_hash_conflict');
+        if (!current) s.getRange(existing, RECOVERY_HASH_COLUMN).setValue(recoveryHash);
+      }
+      return {ok:true,order_id:id};
+    }
     const t=msk();
-    s.appendRow([id,t,tariff,p.amount_rub,'RUB','','created','','pending','','',t]);
+    s.appendRow([id,t,tariff,p.amount_rub,'RUB','','created','','pending','','',t,recoveryHash]);
     return {ok:true,order_id:id};
   }
   if (action === 'log_event') {
