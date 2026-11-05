@@ -322,7 +322,7 @@ def has_forbidden_outside_qualifiers(value: str) -> bool:
 def check_character_input(value: str) -> list[str]:
     names = split_characters(value)
     if (
-        not 1 <= len(names) <= 3
+        len(names) < 1
         or len(value) > 1350
         or any(len(name) > 450 for name in names)
         or len(INPUT_TOKENIZER.encode(value)) > INPUT_TOKEN_LIMIT
