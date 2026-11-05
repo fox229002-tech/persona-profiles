@@ -512,6 +512,58 @@ def save_encrypted_result(operation, result, download_text):
 
 
 
+CHECKPOINT_KEYS = (
+    "paid_plan", "research_characters", "profiles", "result", "profile_text",
+    "compat", "compat_text", "profile_download_clicked",
+    "compat_download_clicked", "compat_relation", "name_a", "name_b",
+    "text_a", "text_b", "use_mine", "compat_inputs",
+)
+
+
+def save_progress(step):
+    """Persist a completed UI transition as one encrypted order checkpoint."""
+    from result_crypto import encrypt_result
+    manager = journal()
+    order_id = st.session_state.get("order_id")
+    secret = st.session_state.get("order_recovery_secret")
+    if not manager or not order_id or not secret:
+        raise JournalError("Нет данных для сохранения прогресса")
+    state = {k: st.session_state[k] for k in CHECKPOINT_KEYS if k in st.session_state}
+    state["research_step"] = step
+    state["selected_picks"] = [i for i in range(len(st.session_state.get("profiles", [])))
+                               if st.session_state.get(f"pick_{i}", False)]
+    ciphertext = encrypt_result(json.dumps(state, ensure_ascii=False),
+                                str(st.secrets["result_encryption"]["key"]))
+    access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+    manager.save_checkpoint(order_id, ciphertext, access_hash)
+
+
+def restore_checkpoint(order_id, secret, manager, access_hash):
+    from result_crypto import decrypt_result
+    response = manager.get_checkpoint(order_id, access_hash)
+    if response.get("status") != "available":
+        return False
+    state = json.loads(decrypt_result(response["ciphertext"],
+                                     str(st.secrets["result_encryption"]["key"])))
+    step = state.get("research_step")
+    if step not in ("characters", "descriptions", "profile_result",
+                    "compat_input", "compat_result"):
+        raise ValueError("invalid_checkpoint_step")
+    if state.get("paid_plan") not in ("profile", "full"):
+        raise ValueError("invalid_checkpoint_plan")
+    for key in CHECKPOINT_KEYS:
+        if key in state:
+            st.session_state[key] = state[key]
+    for i in state.get("selected_picks", []):
+        if isinstance(i, int) and 0 <= i < len(state.get("profiles", [])):
+            st.session_state[f"pick_{i}"] = True
+    st.session_state.order_id = order_id
+    st.session_state.order_recovery_secret = secret
+    st.session_state.research_step = step
+    st.session_state.site_page = "Исследование"
+    return True
+
+
 def order_recovery_link():
     """Stable link issued at checkout; no result is required yet."""
     order_id = st.session_state.get("order_id")
@@ -552,6 +604,9 @@ def restore_from_link():
         if not manager:
             raise JournalError("Журнал недоступен")
         access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+        if not operation and restore_checkpoint(order_id, secret, manager, access_hash):
+            st.query_params.clear()
+            st.rerun()
         if not operation:
             for candidate in ("compatibility", "profile"):
                 response = manager.get_temporary_result(order_id, candidate, access_hash)
@@ -728,6 +783,7 @@ elif step == "checkout":
             for key in list(st.session_state):
                 if str(key).startswith("pick_"):
                     del st.session_state[key]
+            save_progress("characters")
             navigate("characters")
         except (JournalError, ValueError, KeyError) as exc:
             st.error(f"Не удалось зарегистрировать заказ: {exc}. Попробуйте ещё раз.")
@@ -765,6 +821,7 @@ elif step == "characters":
                 for key in list(st.session_state):
                     if str(key).startswith("pick_"):
                         del st.session_state[key]
+                save_progress("descriptions")
                 navigate("descriptions")
             except Exception as exc:
                 st.error(f"Не получилось создать описания: {str(exc).rstrip(chr(46))}. Введённые персонажи сохранены.")
@@ -797,6 +854,7 @@ elif step == "descriptions":
                 try:
                     pending = st.session_state.get("pending_profile_result")
                     if pending is None:
+                        save_progress("descriptions")
                         generation_guard("profile")
                         journal_event("ai_request", operation="profile")
                         try:
@@ -816,6 +874,7 @@ elif step == "descriptions":
                     st.session_state.profile_text = download_text
                     st.session_state.profile_download_clicked = False
                     st.session_state.pop("profile_display_logged", None)
+                    save_progress("profile_result")
                     navigate("profile_result")
                 except Exception as exc:
                     st.error(f"Не удалось подготовить результат: {exc}. Выбранные описания сохранены.")
@@ -841,6 +900,7 @@ elif step == "profile_result":
                               file_name="psychoprofile.txt"):
             st.session_state.profile_download_clicked = True
             try:
+                save_progress("profile_result")
                 journal_event("download_clicked", operation="profile")
             except Exception as exc:
                 st.warning(f"Журнал: {exc}")
@@ -850,6 +910,7 @@ elif step == "profile_result":
                 st.caption("Для продолжения сначала скачайте результат профиля.")
             if st.button("Продолжить тестирование", type="primary",
                          disabled=not st.session_state.get("profile_download_clicked", False)):
+                save_progress("compat_input")
                 navigate("compat_input")
         else:
             st.markdown("### Продолжить исследование вместе с партнёром")
@@ -898,6 +959,8 @@ elif step == "compat_input":
                     na, nb = names[0] or "Человек А", names[1] or "Человек Б"
                     pending = st.session_state.get("pending_compat_result")
                     if pending is None:
+                        st.session_state.compat_inputs = {"texts": texts, "names": names, "relation": relation}
+                        save_progress("compat_input")
                         generation_guard("compatibility")
                         journal_event("ai_request", operation="compatibility")
                         try:
@@ -919,6 +982,7 @@ elif step == "compat_input":
                     st.session_state.compat_download_clicked = False
                     st.session_state.compat_text = download_text
                     st.session_state.pop("compat_display_logged", None)
+                    save_progress("compat_result")
                     navigate("compat_result")
                 except Exception as exc:
                     st.error(f"Не получилось: {exc}. Введённые данные сохранены.")
@@ -945,6 +1009,7 @@ elif step == "compat_result":
                               file_name="compatibility.txt"):
             st.session_state.compat_download_clicked = True
             try:
+                save_progress("compat_result")
                 journal_event("download_clicked", operation="compatibility")
             except Exception as exc:
                 st.warning(f"Журнал: {exc}")
