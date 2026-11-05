@@ -497,10 +497,17 @@ def process_payment(plan_key: str, amount: int) -> bool:
         pending = st.session_state.get("pending_order")
         if not pending or pending["plan"] != plan_key or pending["amount"] != amount:
             pending = {"plan": plan_key, "amount": amount,
-                       "id": "OBR-" + uuid.uuid4().hex[:20].upper()}
+                       "id": "OBR-" + uuid.uuid4().hex[:20].upper(),
+                       "recovery_secret": secrets.token_urlsafe(32)}
             st.session_state.pending_order = pending
-        order_id = manager.create_order(plan_key, amount, order_id=pending["id"])
+        # Keep the same credential across retries; never overwrite a bound hash.
+        if "recovery_secret" not in pending:
+            pending["recovery_secret"] = secrets.token_urlsafe(32)
+        recovery_hash = hashlib.sha256(pending["recovery_secret"].encode("utf-8")).hexdigest()
+        order_id = manager.create_order(plan_key, amount, order_id=pending["id"],
+                                        recovery_hash=recovery_hash)
         st.session_state.order_id = order_id
+        st.session_state.order_recovery_secret = pending["recovery_secret"]
         journal_event("payment_demo", operation=plan_key, status="simulated")
         st.session_state.pop("pending_order", None)
     return True
