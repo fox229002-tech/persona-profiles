@@ -107,6 +107,14 @@ class OrderManager:
             fields["result_sha256"] = sha256(result)
         self._call("update_order", **fields)
 
+    def claim_generation(self, order_id, operation, recovery_hash, claim_id):
+        return self._call("generation_claim", order_id=order_id, operation=operation,
+                          recovery_hash=recovery_hash, claim_id=claim_id)
+
+    def finish_generation(self, order_id, operation, recovery_hash, claim_id, status):
+        return self._call("generation_finish", order_id=order_id, operation=operation,
+                          recovery_hash=recovery_hash, claim_id=claim_id, status=status)
+
     def save_temporary_result(self, order_id, operation, ciphertext, recovery_hash):
         """Store only Fernet ciphertext; no plaintext sent to Apps Script."""
         if operation not in ("profile", "compatibility"):
