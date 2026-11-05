@@ -292,6 +292,15 @@ ROLE_MARKER_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+FICTIONAL_PATTERN = re.compile(r"\b(?:вымышленн\w*|несуществующ\w*|придуманн\w*|fictional|made[ -]up)\b", re.I)
+INJECTION_PATTERN = re.compile(r"system\s+prompt|developer\s+message|ignore\s+previous\s+instructions|раскрой\s+системн\w*\s+промпт\w*", re.I)
+
+def classify_request_text(value):
+    flags = set()
+    if FICTIONAL_PATTERN.search(value): flags.add("EXPLICITLY_FICTIONAL")
+    if INJECTION_PATTERN.search(value): flags.add("POSSIBLE_PROMPT_INJECTION")
+    return flags
+
 INPUT_TOKEN_LIMIT = 900
 INPUT_TOKENIZER = tiktoken.get_encoding("cl100k_base")
 
@@ -371,13 +380,18 @@ def generate_profiles(characters: str) -> list[dict]:
         "brain_zones (массив из 3 строк вида «Зона (что она даёт)»: это твоя внутренняя опора для логичного описания, пользователю она не показывается),\n"
         "signs (массив из 3 строк: как этот тип проявляется в повседневных привычках и в теле),\n"
         "overload (массив из 2 точек психофизиологической перегрузки),\n"
-        "adaptation (строка: стратегия адаптации, 2–3 предложения).\n\n"
+        "adaptation (строка: стратегия адаптации, 2–3 предложения),\n"
+        "_possibly_fictional (true, если не можешь уверенно опознать персонажа, иначе false; служебное поле).\n\n"
         + CARD_SAMPLES
     )
     raw = ask_llm(prompt, max_output_tokens=600 + 2100 * len(names))
     raw = re.sub(r"^```(?:json)?|```$", "", raw.strip(), flags=re.M).strip()
     profiles = json.loads(raw)
     profiles = validate_cards(profiles, len(names))
+    flags = classify_request_text(characters)
+    if any(card.pop("_possibly_fictional", False) is True for card in profiles):
+        flags.add("POSSIBLY_FICTIONAL")
+    st.session_state.request_flags = "; ".join(sorted(flags))
     random.shuffle(profiles)  # порядок не должен выдавать, где чей образ
     return profiles
 
@@ -514,7 +528,7 @@ def journal():
     return OrderManager.from_streamlit_secrets()
 
 
-def journal_event(event_type, *, result=None, operation="", status="ok"):
+def journal_event(event_type, *, result=None, operation="", status="ok", request_flags=""):
     manager = journal()
     order_id = st.session_state.get("order_id")
     if not manager or not order_id:
@@ -524,7 +538,8 @@ def journal_event(event_type, *, result=None, operation="", status="ok"):
     key = f"journal_event_id_{event_type}_{operation}"
     event_id = st.session_state.setdefault(key, str(uuid.uuid4()))
     manager.log_event(order_id, event_type, operation=operation,
-                      status=status, result=result, event_id=event_id)
+                      status=status, result=result, event_id=event_id,
+                      request_flags=request_flags)
     st.session_state.pop(key, None)
 
 
@@ -904,6 +919,8 @@ elif step == "checkout":
             process_payment(choice, PLANS[choice]["price"])
             st.session_state.paid_plan = choice
             st.session_state.pop("profiles", None)
+            st.session_state.pop("request_flags", None)
+            st.session_state.pop("request_flags_logged", None)
             st.session_state.pop("result", None)
             st.session_state.pop("profile_text", None)
             st.session_state.pop("compat", None)
@@ -952,6 +969,10 @@ elif step == "characters":
                     except Exception:
                         generation_finish("descriptions", "failed")
                         raise
+                if not st.session_state.get("request_flags_logged"):
+                    journal_event("input_classification", operation="descriptions",
+                                  request_flags=st.session_state.get("request_flags", ""))
+                    st.session_state.request_flags_logged = True
                 for key in list(st.session_state):
                     if str(key).startswith("pick_"):
                         del st.session_state[key]
