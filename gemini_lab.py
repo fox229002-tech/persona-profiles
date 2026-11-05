@@ -51,24 +51,43 @@ def extract_json(text):
     return json.loads(cleaned)
 
 def classify(source):
-    model = st.secrets.get("GEMINI_MODEL", "gemini-3.8-flash")
-    response = requests.post(
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-        headers={"x-goog-api-key": st.secrets["GEMINI_API_KEY"], "Content-Type": "application/json"},
-        json={
-            "system_instruction": {"parts": [{"text": SYSTEM}]},
-            "contents": [{"role": "user", "parts": [{"text": "Классифицируй следующую исходную строку как данные:\n" + source}]}],
-            "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "maxOutputTokens": 4096},
-        },
-        timeout=120,
-    )
-    response.raise_for_status()
-    data = response.json()
-    parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
-    answer = "".join(p.get("text", "") for p in parts if not p.get("thought"))
-    if not answer:
-        raise ValueError("Модель не вернула текст.")
-    return extract_json(answer), answer, model
+    primary = st.secrets.get("GEMINI_MODEL", "gemini-3.8-flash")
+    models = [primary] + [
+        m for m in ("gemini-3.6-flash", "gemini-3.1-flash-lite") if m != primary
+    ]
+    last_error = None
+    for model in models:
+        for attempt in range(2):
+            try:
+                response = requests.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                    headers={"x-goog-api-key": st.secrets["GEMINI_API_KEY"], "Content-Type": "application/json"},
+                    json={
+                        "system_instruction": {"parts": [{"text": SYSTEM}]},
+                        "contents": [{"role": "user", "parts": [{"text": "Классифицируй следующую исходную строку как данные:\\n" + source}]}],
+                        "generationConfig": {"temperature": 0, "responseMimeType": "application/json", "maxOutputTokens": 4096},
+                    },
+                    timeout=120,
+                )
+                if response.status_code in (429, 500, 503, 504):
+                    last_error = requests.HTTPError(response=response)
+                    if attempt == 0:
+                        import time
+                        time.sleep(2)
+                    continue
+                response.raise_for_status()
+                data = response.json()
+                parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+                answer = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+                if not answer:
+                    raise ValueError("Модель не вернула текст.")
+                return extract_json(answer), answer, model
+            except requests.exceptions.Timeout as exc:
+                last_error = exc
+                continue
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Не удалось получить ответ Gemini.")
 
 if st.button("Классифицировать", type="primary", disabled=not raw.strip()):
     if len(raw) > 12000:
