@@ -409,6 +409,7 @@ def save_encrypted_result(operation, result, download_text):
     if pending is None:
         recovery_secret = secrets.token_urlsafe(32)
         pending = {
+            "secret": recovery_secret,
             "hash": hashlib.sha256(recovery_secret.encode("utf-8")).hexdigest(),
             "ciphertext": encrypt_result(
                 json.dumps({"result": result, "download_text": download_text}, ensure_ascii=False),
@@ -425,6 +426,68 @@ def save_encrypted_result(operation, result, download_text):
         if existing.get("status") != "available" or existing.get("ciphertext") != pending["ciphertext"]:
             raise
     st.session_state[f"temporary_saved_{order_id}_{operation}"] = True
+
+
+
+def recovery_link(operation):
+    order_id = st.session_state.get("order_id")
+    if not order_id:
+        return
+    pending = st.session_state.get(f"temporary_{order_id}_{operation}")
+    if not pending or not st.session_state.get(f"temporary_saved_{order_id}_{operation}"):
+        return
+    from urllib.parse import urlencode
+    url = "https://yvtsiteuv37h8wnkzdbpxx.streamlit.app/?" + urlencode({
+        "recover_order": order_id, "recover_operation": operation,
+        "recover_secret": pending["secret"],
+    })
+    st.info("Сохраните ссылку для восстановления результата в течение 2 минут. Любой, у кого есть ссылка, сможет открыть результат.")
+    st.code(url, language=None)
+
+
+def restore_from_link():
+    """Restore existing encrypted result, never invoke an LLM."""
+    order_id = str(st.query_params.get("recover_order", ""))
+    operation = str(st.query_params.get("recover_operation", ""))
+    secret = str(st.query_params.get("recover_secret", ""))
+    if not order_id:
+        return False
+    st.session_state.site_page = "Исследование"
+    if (not re.fullmatch(r"OBR-[A-Za-z0-9-]{10,90}", order_id)
+            or operation not in ("profile", "compatibility")
+            or not re.fullmatch(r"[A-Za-z0-9_-]{40,100}", secret)):
+        st.error("Неверная ссылка восстановления.")
+        st.stop()
+    try:
+        from result_crypto import decrypt_result
+        manager = journal()
+        if not manager:
+            raise JournalError("Журнал недоступен")
+        access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+        response = manager.get_temporary_result(order_id, operation, access_hash)
+        if response.get("status") != "available":
+            st.warning("Срок хранения результата истёк.")
+            st.stop()
+        data = json.loads(decrypt_result(
+            response["ciphertext"], str(st.secrets["result_encryption"]["key"])))
+        if not isinstance(data.get("result"), str) or not isinstance(data.get("download_text"), str):
+            raise ValueError("invalid_result")
+        st.session_state.order_id = order_id
+        st.session_state.paid_plan = "full" if operation == "compatibility" else "profile"
+        if operation == "profile":
+            st.session_state.result = data["result"]
+            st.session_state.profile_text = data["download_text"]
+            st.session_state.research_step = "profile_result"
+        else:
+            st.session_state.compat = data["result"]
+            st.session_state.compat_text = data["download_text"]
+            st.session_state.research_step = "compat_result"
+        st.query_params.clear()
+        st.rerun()
+    except (JournalError, ValueError, KeyError, TypeError):
+        st.error("Не удалось восстановить результат. Проверьте ссылку и срок действия.")
+        st.stop()
+    return True
 
 
 def process_payment(plan_key: str, amount: int) -> bool:
@@ -460,6 +523,9 @@ def show_art(filename, width=None):
 def navigate(step):
     st.session_state.research_step = step
     st.rerun()
+
+if st.query_params.get("recover_order"):
+    restore_from_link()
 
 if st.query_params.get("view") == "research":
     requested_plan = st.query_params.get("plan")
@@ -636,6 +702,7 @@ elif step == "profile_result":
             navigate("descriptions")
     else:
         st.subheader("Шаг 3 из 3. Ваш профиль")
+        recovery_link("profile")
         st.markdown(st.session_state.result)
         if not st.session_state.get("profile_display_logged"):
             try:
@@ -733,6 +800,7 @@ elif step == "compat_result":
             navigate("compat_input")
     else:
         st.subheader("💞 Разбор совместимости")
+        recovery_link("compatibility")
         st.markdown(st.session_state.compat)
         if not st.session_state.get("compat_display_logged"):
             try:
