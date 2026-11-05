@@ -60,7 +60,7 @@ class OrderManager:
                     raise JournalError("Нет подтверждения записи в журнал") from exc
                 time.sleep(attempt + 1)
 
-    def create_order(self, tariff, amount_rub, *, order_id=None):
+    def create_order(self, tariff, amount_rub, *, order_id=None, recovery_hash=None):
         if not isinstance(tariff, str) or not CODE.fullmatch(tariff):
             raise ValueError("Неверный тариф")
         if type(amount_rub) is not int or amount_rub < 0:
@@ -68,7 +68,12 @@ class OrderManager:
         order_id = order_id or ("OBR-" + uuid.uuid4().hex[:20].upper())
         if not CODE.fullmatch(order_id):
             raise ValueError("Неверный номер заказа")
-        self._call("create_order", order_id=order_id, tariff=tariff, amount_rub=amount_rub)
+        fields = {"order_id": order_id, "tariff": tariff, "amount_rub": amount_rub}
+        if recovery_hash is not None:
+            if not re.fullmatch(r"[a-f0-9]{64}", recovery_hash):
+                raise ValueError("Неверный хеш восстановления")
+            fields["recovery_hash"] = recovery_hash
+        self._call("create_order", **fields)
         return order_id
 
     def log_event(self, order_id, event_type, *, operation="", status="ok",
