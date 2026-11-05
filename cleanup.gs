@@ -1,5 +1,5 @@
 /**
- * Образы — ИЗОЛИРОВАННЫЙ тест очистки временных файлов.
+ * Образы — очистка временных зашифрованных результатов.
  * Не подключён к app.py и не изменяет журнал заказов.
  *
  * Установка: вставить этот файл в ТОТ ЖЕ проект Apps Script,
@@ -10,7 +10,7 @@
  * внутри специально созданной папки, ID которой хранится
  * в свойствах скрипта. Не использовать папку с другими файлами.
  */
-const CLEANUP_TEST_TTL_MS = 2 * 60 * 1000;
+const CLEANUP_TEST_TTL_MS = 60 * 60 * 1000;
 const CLEANUP_PREFIX = 'OBR_TMP_';
 const CLEANUP_FOLDER_PROP = 'OBR_CLEANUP_TEST_FOLDER_ID';
 const CLEANUP_DELETED_PROP = 'OBR_CLEANUP_TEST_DELETED_TOTAL';
