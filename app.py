@@ -751,7 +751,17 @@ elif step == "characters":
     if st.button("Продолжить", disabled=not characters.strip()):
         with st.spinner("Создаю описания..."):
             try:
-                st.session_state.profiles = generate_profiles(characters)
+                generation_guard("descriptions")
+                try:
+                    generated_profiles = generate_profiles(characters)
+                except Exception:
+                    generation_finish("descriptions", "failed")
+                    raise
+                # Descriptions are only held in the current session, not in the
+                # encrypted result store. Release the lease after successful
+                # generation so a lost session does not permanently block input.
+                st.session_state.profiles = generated_profiles
+                generation_finish("descriptions", "released")
                 for key in list(st.session_state):
                     if str(key).startswith("pick_"):
                         del st.session_state[key]
