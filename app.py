@@ -283,6 +283,36 @@ COMMAND_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+ 
+CLARIFY_CHARACTER_MESSAGE = "Уточните персонажа в соответствии с правилами."
+
+# Проверяем только однозначные формальные случаи, без догадок об идентичности.
+NUMBER_CHARACTER_PATTERN = re.compile(
+    r"^(?:[+-]?\\d+(?:[.\\-]\\d+)*|"
+    r"число\\s+\\d+|цифра\\s+\\d+|"
+    r"первый|второй|третий|сорок\\s+семь)$",
+    re.IGNORECASE,
+)
+OBJECT_CHARACTER_PATTERN = re.compile(
+    r"^(?:кофейн(?:ая|ую)\\s+чашк[а-я]*|чашка|"
+    r"синий\\s+треугольник|треугольник|"
+    r"стол|стул|лампа|книга|карандаш|"
+    r"телефон|зеркало|камень|дерево|"
+    r"кружка|чайник|ложка|тарелка)$",
+    re.IGNORECASE,
+)
+
+
+def needs_character_clarification(name: str) -> bool:
+    # Пояснение допустимо в круглых скобках или кавычках.
+    if re.search(r"\\([^()]+\\)|«[^»]+»|\\\"[^\\\"]+\\\"", name):
+        return False
+    clean = name.strip()
+    if NUMBER_CHARACTER_PATTERN.fullmatch(clean) or OBJECT_CHARACTER_PATTERN.fullmatch(clean):
+        return True
+    # Одно слово — только имя, фамилия либо ник без идентификатора.
+    return len(clean.split()) == 1
+
 
 def check_character_input(value: str) -> list[str]:
     names = split_characters(value)
@@ -293,6 +323,8 @@ def check_character_input(value: str) -> list[str]:
         or COMMAND_PATTERN.search(value)
     ):
         raise ValueError(INVALID_CHARACTER_MESSAGE)
+    if any(needs_character_clarification(name) for name in names):
+        raise ValueError(CLARIFY_CHARACTER_MESSAGE)
     return names
 
 
@@ -888,11 +920,15 @@ elif step == "characters":
     with b_art:
         show_art("man.svg")
     st.info(
-        "Введите от 1 до 3 персонажей фильмов, книг или публичных людей, с которыми вы себя ассоциируете. "
-        "Запятые ставьте только между персонажами. Внутри имён, названий и пояснений запятые не используйте. Пояснения о персонаже указывайте только "
-        "в скобках или кавычках, без описания характера. "
-        "Пример: Элизабет Гилберт (героиня фильма «Ешь молись люби»), "
-        "Дональд Трамп, Гуинплен (герой романа Виктора Гюго)."
+        "Введите от 1 до 3 персонажей так, чтобы каждого можно было однозначно идентифицировать. "
+        "Разделяйте персонажей запятыми; в остальных местах запятые не ставьте. "
+        "Уточнения пишите только в скобках или кавычках, без описания характера. "
+        "Одно имя или фамилия, неодушевлённый предмет и числительное без уточнения не принимаются. "
+        "Примеры: Эдвард Лоренц (математик — теория хаоса), "
+        "Мария Кюри (учёная — Нобелевская премия), "
+        "Наполеон Бонапарт (император Франции XIX века), "
+        "Маша (героиня мультсериала «Маша и Медведь»), "
+        "Кофейная чашка (персонаж конкретного произведения — укажите название)."
     )
     characters = st.text_input("Персонажи", key="research_characters")
     if st.button("Продолжить", disabled=not characters.strip()):
