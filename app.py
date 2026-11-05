@@ -1,6 +1,8 @@
 import json
 import base64
 import hmac
+import hashlib
+import secrets
 import random
 import re
 import time
@@ -27,6 +29,28 @@ if st.secrets.get("TEST_FAILURE_MODE", False):
                 st.success("Шифрование: OK")
             except Exception:
                 st.error("Шифрование: ошибка. Проверьте ключ и настройки.")
+
+        if st.button("Проверить обмен с Google Drive (2 минуты)", key="crypto_drive_check"):
+            try:
+                from result_crypto import encrypt_result, decrypt_result
+                key = str(st.secrets["result_encryption"]["key"])
+                manager = OrderManager.from_streamlit_secrets()
+                order_id = "OBR-TEST-" + uuid.uuid4().hex
+                secret = secrets.token_urlsafe(32)
+                access_hash = hashlib.sha256(secret.encode("utf-8")).hexdigest()
+                sample = "Фиктивный тестовый результат Образы 🌿"
+                ciphertext = encrypt_result(sample, key)
+                manager.create_order("test", 0, order_id=order_id)
+                manager.update_order(order_id, service_status="completed")
+                saved = manager.save_temporary_result(order_id, "profile", ciphertext, access_hash)
+                fetched = manager.get_temporary_result(order_id, "profile", access_hash)
+                if fetched.get("status") != "available" or decrypt_result(fetched["ciphertext"], key) != sample:
+                    raise RuntimeError("Восстановленный текст не совпадает")
+                st.success("Google Drive: сохранение и восстановление OK (2 минуты)")
+                st.caption("Только фиктивные данные. Доступ истечёт через 2 минуты.")
+            except Exception:
+                st.error("Проверка обмена не прошла. Посмотри журналы Apps Script и Streamlit.")
+
 
 
 SYSTEM = "Ты умный и эмпатичный ИИ, помогай пользователю находить себя."
