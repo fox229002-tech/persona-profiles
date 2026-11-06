@@ -1007,9 +1007,18 @@ elif step == "checkout":
         has_profile = st.checkbox("У меня есть готовый профиль", key="has_ready_profile")
     else:
         has_profile = True
+    accepted_documents = st.checkbox(
+        "Я ознакомился(ась) с [Публичной офертой](https://github.com/fox229002-tech/persona-profiles/blob/design-prototype/assets/oferta.docx) "
+        "и [Политикой конфиденциальности](https://github.com/fox229002-tech/persona-profiles/blob/design-prototype/assets/politika.docx) и принимаю их условия",
+        key="checkout_accepted_documents",
+    )
+    confirmed_adult = st.checkbox(
+        "Подтверждаю, что мне исполнилось 18 лет",
+        key="checkout_confirmed_adult",
+    )
     st.info("Сейчас доступен демонстрационный режим: оплата имитируется, деньги не списываются.")
     if st.button(f"Оплатить {PLANS[choice]['price']} ₽ и начать исследование",
-                 disabled=not has_profile):
+                 disabled=not (has_profile and accepted_documents and confirmed_adult)):
         try:
             process_payment(choice, PLANS[choice]["price"])
             st.session_state.paid_plan = choice
