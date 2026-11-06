@@ -1206,12 +1206,7 @@ elif step == "compat_input":
                 if st.checkbox("Взять мой профиль из исследования «Профиль»", key="use_mine"):
                     profile_text = st.session_state.profile_text
             if not profile_text:
-upload = st.file_uploader(
-    "Файл профиля (не более 2 МБ)",
-    type=["txt", "docx"],
-    max_upload_size=2,
-    key=f"file_{key}"
-)
+                upload = st.file_uploader("Файл профиля (не более 2 МБ)", type=["txt", "docx"], max_upload_size=2, key=f"file_{key}")
                 if upload is not None:
                     try:
                         profile_text = read_profile_file(upload)
